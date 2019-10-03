@@ -18,6 +18,16 @@
   font-size: large;
 }
 
+.siteTitle {
+  font-family: 'Karla', sans-serif;
+  font-size: xx-large;
+}
+
+.siteNav {
+  font-family: 'Montserrat', sans-serif;
+  font-size: large;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

@@ -1,0 +1,20 @@
+.Card {
+    width:"96%";
+}
+
+.CardTitle {
+    font-family: 'Karla', sans-serif;
+    font-size: xx-large;
+    text-align: left;
+}
+  
+.TaskField {
+    font-family: 'Montserrat', sans-serif;
+    font-size: large;
+}
+  
+.SubmitButton {
+    font-size: large;
+    font-family: 'Karla', sans-serif;
+    float: left;
+}
