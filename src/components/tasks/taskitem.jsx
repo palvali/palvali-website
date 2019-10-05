@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { Button, Badge, Form, Input, Row, ButtonGroup, Col, InputGroup, InputGroupAddon } from 'reactstrap';
-import { Card, CardHeader, CardBody, Spinner } from 'reactstrap';
+import { Card, CardTitle, CardText, CardHeader, CardBody, Spinner, Container } from 'reactstrap';
 import { Table } from 'reactstrap';
 import './addtask.css';
-import { addTodo } from '../../actions';
 
 export default class TaskItem extends Component {
 
@@ -12,6 +11,7 @@ export default class TaskItem extends Component {
 
         this.state = {
             task: {},
+            id: '',
             priorityColor: 'info',
             categoryColor: 'info'
         }
@@ -20,6 +20,7 @@ export default class TaskItem extends Component {
     componentDidMount(){
         let task = JSON.parse( this.props.task );
         this.setState({task: task});
+        this.setState(state => ({ id: this.props.key }));
         console.log("Parsed "+JSON.stringify(task))
         var priorityColor
         if(task.priority == 'High') {
@@ -41,20 +42,17 @@ export default class TaskItem extends Component {
 
         this.setState(state => ({ priorityColor: priorityColor }));
         this.setState(state => ({ categoryColor: categoryColor }));
-    } 
+    }
 
     render() {
         return (
-            <tr>
-                <td>{this.state.task.title}</td>
-                <td>
-                    <Badge color={this.state.priorityColor} outline>{this.state.task.priority}</Badge>
-                    &nbsp;&nbsp;
-                    <Badge color={this.state.categoryColor} outline>{this.state.task.category}</Badge>
-                </td>
-                <td>{""+this.state.task.effort}</td>
-                <td>{""+this.state.task.deadline}</td>
-            </tr>
+            <Row>
+                <Col xs="auto">{this.state.task.title}</Col>
+                <Col><Badge color={this.state.priorityColor} outline>{this.state.task.priority}</Badge></Col>
+                <Col><Badge color={this.state.categoryColor} outline>{this.state.task.category}</Badge></Col>
+                <Col><Badge outline>{""+this.state.task.effort} hours</Badge></Col>
+                <Col><Badge outline>{""+this.state.task.deadline}</Badge></Col>
+            </Row>
         )
     }
 }

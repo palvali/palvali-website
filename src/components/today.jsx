@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 
+import TodayContainer from '../containers/TodayContainer';
+
 export default class Today extends Component {
     render() {
         return (
-            <center>
             <div>
-                This is today.
+                <TodayContainer></TodayContainer>
             </div>
-            </center>
         )
     }
 }

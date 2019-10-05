@@ -78,29 +78,6 @@ export default class AddTask extends Component {
         }});
     }
 
-    // handleSubmit(event) {
-    //     this.setState({loading: true});
-    //     event.preventDefault();
-    //     var input = JSON.stringify(this.state.data);
-    //     console.log("Calling API with input: " + input);
-    //     fetch(`http://localhost:6000/addtask`, {
-    //         method: 'POST',
-    //         headers: {
-    //           'Accept': 'application/json',
-    //           'Content-Type': 'application/json',
-    //         },
-    //         body: input
-    //       }).then(result => result.json)
-    //         .then(response => console.log('Success:', JSON.stringify(response)))
-    //         .catch(error => console.error('Error:', error));
-    //     this.setState({loading: false});
-    //     this.setState({data: {
-    //         'title':'',
-    //         'deadline':''
-    //     }});
-    //     console.log("Clearing the form, state data: ");
-    // }
-
     render() {
         return (
             <div>
