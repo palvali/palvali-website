@@ -19,7 +19,7 @@ export default class Header extends Component {
 
     render() {
         return (
-            <Navbar dark color="info" expand="md">
+            <Navbar dark expand="md" style={{background:"#213969"}}>
                 <NavbarBrand href="/"><span className="siteTitle">ONE PLANNER</span></NavbarBrand>
                 <NavbarToggler onClick={this.toggle} />
                 <Collapse isOpen={this.state.isOpen} navbar>

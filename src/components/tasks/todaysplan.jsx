@@ -1,16 +1,18 @@
 import React from 'react';
-import { Table, Jumbotron, Button, Alert } from 'reactstrap';
+import { Table, Jumbotron, Container, Alert } from 'reactstrap';
 import { Card, CardText, Row, Col } from 'reactstrap';
 import TaskItem from './taskitem'
+import Button from '@material-ui/core/Button';
 import './addtask.css';
 
 export default function Today(props) {
 
-    function renderMajorTasks(majorTasks) {
+    function renderMajorTasks(majorTasks, todaysTasks) {
         return (
             <Jumbotron>
-                <h1 className="display-3">Hello, Teja!</h1>
-                <p className="lead">Here is your today's plan. Focus! Get things done!</p>
+                <h3 className="display-6"> 
+                    {todaysTasks.length + majorTasks.length} tasks left for the day. 
+                </h3>
                 <p className="lead">Work on this now-</p>
                 {
                     majorTasks.map(renderMajorTask)
@@ -24,7 +26,7 @@ export default function Today(props) {
         return (
             <div className="lead">
             <Alert color="primary">{taskJson.title}</Alert>
-            Spend around {taskJson.effort} hours on it. You can do it. This is a {taskJson.priority} priority task.
+            Spend around {taskJson.effort} hours on it. This is a {taskJson.priority} priority task.
             </div>
         );
     }
@@ -76,7 +78,7 @@ export default function Today(props) {
         let todaysTasks = filterTodaysTasks(props.allTodos)
         let majorTasks = todaysTasks.splice(0, 1)
         return [
-            renderMajorTasks(majorTasks),
+            renderMajorTasks(majorTasks, todaysTasks),
             renderOtherTasks(todaysTasks)
         ]
     }

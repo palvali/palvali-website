@@ -6,9 +6,9 @@ export default class Planner extends Component {
     render() {
         return (
             <div>
-                <AddTaskContainer></AddTaskContainer>
-                <br />
                 <ShowTasksContainer></ShowTasksContainer>
+                <br />
+                <AddTaskContainer></AddTaskContainer>
             </div>
         )
     }

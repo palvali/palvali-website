@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 import { Button, Form, Input, Row, ButtonGroup, Col, InputGroup, InputGroupAddon } from 'reactstrap';
-import { Card, CardHeader, CardBody, Spinner, Collapse} from 'reactstrap';
+import { Card, CardHeader, CardFooter, CardBody, Spinner, Collapse} from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
 import './addtask.css';
 import { addTodo } from '../../actions';
-
 
 export default class AddTask extends Component {
 
@@ -83,74 +85,75 @@ export default class AddTask extends Component {
             <div>
                 <br />
                 <center>
-                    <Card style={{width:"96%"}} outline color="secondary">
-                        <CardHeader tag="h3" className="CardTitle">
-                            <div className="clearfix">
-                                Add Task
-                                <Button className="btn float-right" onClick={this.toggle}>{this.state.expandButtonText}</Button>
-                            </div>
-                        </CardHeader>
-                        <Collapse isOpen={this.state.collapse}>
-                        <CardBody>
-                            <Form onSubmit={this.handleSubmit}>
-                                <Row>
-                                    <Col md={4}>
-                                        <Input className="TaskField" type="text" name="taskTitle" id="taskTitle" placeholder={this.state.placeholdertitle}
-                                        value={this.state.data.title} onChange={this.handleTitleChange} />
-                                    </Col>
-                                    <Col md={4}>
-                                        <ButtonGroup>
-                                            <Button color="secondary" className="TaskField" outline disabled>takes</Button>
-                                            <Button color="info" outline onClick={() => this.onEffortBtnClick(1)} active={this.state.data.effort === 1}>1</Button>
-                                            <Button color="info" outline onClick={() => this.onEffortBtnClick(2)} active={this.state.data.effort === 2}>2</Button>
-                                            <Button color="info" outline onClick={() => this.onEffortBtnClick(3)} active={this.state.data.effort === 3}>3</Button>
-                                            <Button color="info" outline onClick={() => this.onEffortBtnClick(4)} active={this.state.data.effort === 4}>4</Button>
-                                            <Button color="info" outline onClick={() => this.onEffortBtnClick(5)} active={this.state.data.effort === 5}>5</Button>
-                                            <Button color="info" outline onClick={() => this.onEffortBtnClick(6)} active={this.state.data.effort === 6}>6</Button>
-                                            <Button color="secondary" className="TaskField" outline disabled>hours</Button>
-                                        </ButtonGroup>
-                                    </Col>
+                    <Fab className="btn" color='secondary' aria-label="add">
+                        <AddIcon color="white" onClick={this.toggle} />
+                    </Fab>
 
-                                    <Col md={3.5}>
-                                        <InputGroup>
-                                            <InputGroupAddon className="TaskField" addonType="prepend">complete it by</InputGroupAddon>
-                                            <Input className="TaskField" type="date" name="taskDeadline" id="taskDeadline" 
-                                            value={this.state.data.deadline} onChange={this.handleDeadlineChange}
-                                            />
-                                        </InputGroup>
-                                    </Col>
-                                </Row>
-                                <br />
-                                <Row>
-                                    <Col md={3}>
-                                        <ButtonGroup>
-                                            <Button color="secondary" className="TaskField" outline disabled>priority</Button>
-                                            <Button color="danger" outline onClick={() => this.onPriorityBtnClick("High")} active={this.state.data.priority === "High"}>High</Button>
-                                            <Button color="warning" outline onClick={() => this.onPriorityBtnClick("Medium")} active={this.state.data.priority === "Medium"}>Medium</Button>
-                                            <Button color="info" outline onClick={() => this.onPriorityBtnClick("Low")} active={this.state.data.priority === "Low"}>Low</Button>
-                                        </ButtonGroup>
-                                    </Col>
+                    <Modal isOpen={this.state.collapse} size="lg">
+                        <Form onSubmit={this.handleSubmit}>
+                            <ModalHeader>Add Task</ModalHeader>
+                            <ModalBody>
+                                <Card outline color="secondary">
+                                    <CardBody>
+                                        <Row>
+                                            <Col>
+                                                <Input className="TaskField" type="text" name="taskTitle" id="taskTitle" placeholder={this.state.placeholdertitle}
+                                                value={this.state.data.title} onChange={this.handleTitleChange} />
+                                            </Col>
+                                        </Row>
+                                        <br />
+                                        <Row>
+                                            <Col>
+                                                <ButtonGroup>
+                                                    <Button color="secondary" className="TaskField" outline disabled>takes</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(1)} active={this.state.data.effort === 1}>1</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(2)} active={this.state.data.effort === 2}>2</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(3)} active={this.state.data.effort === 3}>3</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(4)} active={this.state.data.effort === 4}>4</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(5)} active={this.state.data.effort === 5}>5</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(6)} active={this.state.data.effort === 6}>6</Button>
+                                                    <Button color="secondary" className="TaskField" outline disabled>hours</Button>
+                                                </ButtonGroup>
+                                            </Col>
+                                            <Col>
+                                                <InputGroup>
+                                                    <InputGroupAddon className="TaskField" addonType="prepend">complete it by</InputGroupAddon>
+                                                    <Input className="TaskField" type="date" name="taskDeadline" id="taskDeadline" 
+                                                    value={this.state.data.deadline} onChange={this.handleDeadlineChange}
+                                                    />
+                                                </InputGroup>
+                                            </Col>
+                                        </Row>
+                                        <br />
+                                        <Row>
+                                            <Col>
+                                                <ButtonGroup>
+                                                    <Button color="secondary" className="TaskField" outline disabled>priority</Button>
+                                                    <Button color="danger" outline onClick={() => this.onPriorityBtnClick("High")} active={this.state.data.priority === "High"}>High</Button>
+                                                    <Button color="warning" outline onClick={() => this.onPriorityBtnClick("Medium")} active={this.state.data.priority === "Medium"}>Medium</Button>
+                                                    <Button color="info" outline onClick={() => this.onPriorityBtnClick("Low")} active={this.state.data.priority === "Low"}>Low</Button>
+                                                </ButtonGroup>
+                                            </Col>
 
-                                    <Col md={3}>
-                                        <ButtonGroup>
-                                            <Button color="secondary" className="TaskField" outline disabled>category</Button>
-                                            <Button color="danger" outline onClick={() => this.onCatBtnClick("Work")} active={this.state.data.category === "Work"}>Work</Button>
-                                            <Button color="warning" outline onClick={() => this.onCatBtnClick("Home")} active={this.state.data.category === "Home"}>Home</Button>
-                                            <Button color="info" outline onClick={() => this.onCatBtnClick("Personal")} active={this.state.data.category === "Personal"}>Personal</Button>
-                                        </ButtonGroup>
-                                    </Col>
-
-                                </Row>
-                                <br />
-                                <Row>
-                                    <Col>
-                                        {this.state.loading ? <Spinner color="primary" className="SubmitButton" /> : <Button color="primary" outline size="lg" className="SubmitButton" >Submit</Button>}
-                                    </Col>
-                                </Row>
-                            </Form>
-                        </CardBody>
-                        </Collapse>
-                    </Card>
+                                            <Col>
+                                                <ButtonGroup>
+                                                    <Button color="secondary" className="TaskField" outline disabled>category</Button>
+                                                    <Button color="danger" outline onClick={() => this.onCatBtnClick("Work")} active={this.state.data.category === "Work"}>Work</Button>
+                                                    <Button color="warning" outline onClick={() => this.onCatBtnClick("Home")} active={this.state.data.category === "Home"}>Home</Button>
+                                                    <Button color="info" outline onClick={() => this.onCatBtnClick("Personal")} active={this.state.data.category === "Personal"}>Personal</Button>
+                                                </ButtonGroup>
+                                            </Col>
+                                        </Row>
+                                    </CardBody> 
+                                </Card>
+                            </ModalBody>
+                            <ModalFooter className="float-left">
+                                {this.state.loading ? <Spinner color="primary" className="SubmitButton" /> : <Button color="primary" size="lg" className="SubmitButton" >Submit</Button>}
+                                {' '}
+                                <Button color="danger" size="lg" onClick={this.toggle}>Close</Button>
+                            </ModalFooter>
+                        </Form>
+                    </Modal>
                 </center>
             </div>
         )
