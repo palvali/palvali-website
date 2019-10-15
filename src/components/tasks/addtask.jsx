@@ -3,6 +3,9 @@ import { connect } from 'react-redux';
 import { Button, Form, Input, Row, ButtonGroup, Col, InputGroup, InputGroupAddon } from 'reactstrap';
 import { Card, CardHeader, CardFooter, CardBody, Spinner, Collapse} from 'reactstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import './addtask.css';
@@ -24,6 +27,7 @@ export default class AddTask extends Component {
         this.toggle = this.toggle.bind(this);
 
         this.handleTitleChange = this.handleTitleChange.bind(this);
+        this.handleFollowupChange = this.handleFollowupChange.bind(this);
         this.onPriorityBtnClick = this.onPriorityBtnClick.bind(this);
         this.onEffortBtnClick = this.onEffortBtnClick.bind(this);
         this.onCatBtnClick = this.onCatBtnClick.bind(this);
@@ -48,6 +52,10 @@ export default class AddTask extends Component {
         this.setState({ data: { ...this.state.data, title: event.target.value} });
     }
 
+    handleFollowupChange(event) {
+        this.setState({ data: { ...this.state.data, followup: event.target.checked} });
+    }
+
     onPriorityBtnClick(priority) {
         this.setState({ data: { ...this.state.data, priority} });
     }
@@ -66,6 +74,17 @@ export default class AddTask extends Component {
 
     handleSubmit(event) {
         this.setState({loading: true});
+        this.state.data.status = "Pending";
+        if(!this.state.data.hasOwnProperty('deadline')) {
+            this.state.data.deadline = new Date().toISOString().substr(0,10);
+        }
+
+        if(this.state.data.followup == true) {
+            this.state.data.effort = 0.1
+        }
+
+        console.log(this.state.data)
+
         event.preventDefault();
         var input = JSON.stringify(this.state.data);
 
@@ -76,7 +95,9 @@ export default class AddTask extends Component {
         this.setState({loading: false});
         this.setState({data: {
             'title':'',
-            'deadline':''
+            'deadline':new Date().toISOString().substr(0,10),
+            'status': '',
+            'followup': false
         }});
     }
 
@@ -104,21 +125,32 @@ export default class AddTask extends Component {
                                         <br />
                                         <Row>
                                             <Col>
-                                                <ButtonGroup>
+                                                <Switch
+                                                    onChange={this.handleFollowupChange}
+                                                    value="followup"
+                                                    color="primary"
+                                                />
+                                                Is Follow-up task?
+                                            </Col>
+                                        </Row>
+                                        <br />
+                                        <Row>
+                                            <Col>
+                                                <ButtonGroup >
                                                     <Button color="secondary" className="TaskField" outline disabled>takes</Button>
-                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(1)} active={this.state.data.effort === 1}>1</Button>
-                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(2)} active={this.state.data.effort === 2}>2</Button>
-                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(3)} active={this.state.data.effort === 3}>3</Button>
-                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(4)} active={this.state.data.effort === 4}>4</Button>
-                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(5)} active={this.state.data.effort === 5}>5</Button>
-                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(6)} active={this.state.data.effort === 6}>6</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(1)} active={this.state.data.effort === 1} disabled={this.state.data.followup}>1</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(2)} active={this.state.data.effort === 2} disabled={this.state.data.followup}>2</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(3)} active={this.state.data.effort === 3} disabled={this.state.data.followup}>3</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(4)} active={this.state.data.effort === 4} disabled={this.state.data.followup}>4</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(5)} active={this.state.data.effort === 5} disabled={this.state.data.followup}>5</Button>
+                                                    <Button color="info" outline onClick={() => this.onEffortBtnClick(6)} active={this.state.data.effort === 6} disabled={this.state.data.followup}>6</Button>
                                                     <Button color="secondary" className="TaskField" outline disabled>hours</Button>
                                                 </ButtonGroup>
                                             </Col>
                                             <Col>
                                                 <InputGroup>
                                                     <InputGroupAddon className="TaskField" addonType="prepend">complete it by</InputGroupAddon>
-                                                    <Input className="TaskField" type="date" name="taskDeadline" id="taskDeadline" 
+                                                    <Input className="TaskField" type="date" name="taskDeadline" id="taskDeadline" defaultValue={new Date().toISOString().substr(0,10)}
                                                     value={this.state.data.deadline} onChange={this.handleDeadlineChange}
                                                     />
                                                 </InputGroup>

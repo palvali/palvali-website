@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Switch, Route, HashRouter } from 'react-router-dom';
+import { Switch, Route, HashRouter, Redirect } from 'react-router-dom';
 import Today from './today';
 import Planner from './planner';
 import Past from './past';
@@ -15,6 +15,7 @@ export default class Main extends Component {
                     <Route path="/planner" component={Planner}/>
                     <Route path="/past" component={Past}/>
                     <Route path="/settings" component={Settings}/>
+                    <Redirect exact from="/" to="planner" />
                 </Switch>
             </div>
         )

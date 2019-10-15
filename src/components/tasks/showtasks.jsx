@@ -4,6 +4,8 @@ import TaskItem from './taskitem'
 import './addtask.css';
 import { deleteTodo, editTodo, addTodo } from '../../actions';
 import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
@@ -33,6 +35,9 @@ const useStyles = makeStyles(theme => ({
   },
   extendedIcon: {
     marginRight: theme.spacing(1),
+  },
+  root: {
+    padding: theme.spacing(3, 2),
   },
 }));
 
@@ -68,7 +73,8 @@ export default function ShowTasks(props) {
             priority: t_payload.priority, 
             category: t_payload.category, 
             effort: ""+t_payload.effort, 
-            deadline: ""+t_payload.deadline
+            deadline: ""+t_payload.deadline,
+            status: t_payload.status
         }
     }
 
@@ -85,10 +91,14 @@ export default function ShowTasks(props) {
         const table_data = {
             columns: [
               { title: 'Title', field: 'title' },
-              { title: 'Priority', field: 'priority' },
-              { title: 'Category', field: 'category'},
-              { title: 'Effort', field: 'effort' },
-              { title: 'Deadline', field: 'deadline', type: 'numeric' },
+              { title: 'Priority', field: 'priority', 
+                lookup: { 'High': "High", 'Medium': "Medium", 'Low': "Low" } },
+              { title: 'Category', field: 'category',
+                lookup: { 'Work': "Work", 'Home': "Home", 'Personal': "Personal" }},
+              { title: 'Effort', field: 'effort', filtering: false },
+              { title: 'Deadline', field: 'deadline', type: 'date', filtering: false },
+              { title: 'Status', field: 'status',
+                lookup: { 'Pending': "Pending", 'InProgress': "InProgress", 'Completed': "Completed" }},
             ],
             data: tr_data,
           };
@@ -113,10 +123,15 @@ export default function ShowTasks(props) {
                         color: '#213969'
                     },
                     search: false,
-                    toolbar: false
+                    toolbar: false,
+                    filtering: true,
+                    actionsColumnIndex: -1,
+                    paging: false,
+                    maxBodyHeight: 300
                 }
               }
               editable={{
+                isEditable: rowData => rowData.status != 'Completed',
                 // onRowAdd: newData =>
                 //   new Promise(resolve => {
                 //     setTimeout(() => {
@@ -141,6 +156,21 @@ export default function ShowTasks(props) {
                     }, 600);
                   }),
               }}
+              actions={[
+                rowData => ({
+                  icon: 'check',
+                  tooltip: 'Complete task',
+                  onClick: (event, rowData) => 
+                    new Promise(resolve => {
+                      setTimeout(() => {
+                        resolve();
+                        rowData.status = 'Completed'
+                        editTask(rowData.id, JSON.stringify(rowData))
+                      }, 600);
+                    }),
+                  disabled: rowData.status == 'Completed'
+                })
+              ]}
             />
           );
     }
@@ -177,14 +207,15 @@ export default function ShowTasks(props) {
     }
 
     return <div className="task-list">
-        {/* <Card inverse color="secondary">
-            <CardHeader tag="h3" className="CardTitle">
-                <div className="clearfix">
-                    All Your Tasks
-                </div>
-            </CardHeader>
-        </Card> */}
-        {/* <br /> */}
+        <Paper className={classes.root}>
+        <Typography variant="h4" component="h4">
+          You have {
+            props.allTodos.filter(function(t) {
+              return JSON.parse(t.payload).status != 'Completed';
+            }).length
+          } open tasks.
+        </Typography>
+        </Paper>
         {
             renderAllTasks(props.allTodos)
             // props.allTodos.map(renderTaskItem) 
