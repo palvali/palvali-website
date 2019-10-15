@@ -1,7 +1,17 @@
 {
-  "main.css": "static/css/main.40b4a62f.css",
-  "main.css.map": "static/css/main.40b4a62f.css.map",
-  "main.js": "static/js/main.fe1c7bba.js",
-  "main.js.map": "static/js/main.fe1c7bba.js.map",
-  "static/media/logo.svg": "static/media/logo.5d5d9eef.svg"
+  "files": {
+    "main.css": "/palvali-website/static/css/main.1f9002d1.chunk.css",
+    "main.js": "/palvali-website/static/js/main.35f2518e.chunk.js",
+    "main.js.map": "/palvali-website/static/js/main.35f2518e.chunk.js.map",
+    "runtime~main.js": "/palvali-website/static/js/runtime~main.793c6f62.js",
+    "runtime~main.js.map": "/palvali-website/static/js/runtime~main.793c6f62.js.map",
+    "static/css/2.266e55a5.chunk.css": "/palvali-website/static/css/2.266e55a5.chunk.css",
+    "static/js/2.ada6cf30.chunk.js": "/palvali-website/static/js/2.ada6cf30.chunk.js",
+    "static/js/2.ada6cf30.chunk.js.map": "/palvali-website/static/js/2.ada6cf30.chunk.js.map",
+    "index.html": "/palvali-website/index.html",
+    "precache-manifest.02f34880d8bb398aa698fc694a4bea0c.js": "/palvali-website/precache-manifest.02f34880d8bb398aa698fc694a4bea0c.js",
+    "service-worker.js": "/palvali-website/service-worker.js",
+    "static/css/2.266e55a5.chunk.css.map": "/palvali-website/static/css/2.266e55a5.chunk.css.map",
+    "static/css/main.1f9002d1.chunk.css.map": "/palvali-website/static/css/main.1f9002d1.chunk.css.map"
+  }
 }
