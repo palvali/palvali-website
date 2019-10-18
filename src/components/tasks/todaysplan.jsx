@@ -11,19 +11,24 @@ import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
-import { red } from '@material-ui/core/colors';
+import { red, lightBlue, grey } from '@material-ui/core/colors';
 import { blue } from '@material-ui/core/colors';
 import { orange } from '@material-ui/core/colors';
 import HomeIcon from '@material-ui/icons/Home';
 import WorkIcon from '@material-ui/icons/Work';
 import EmojiPeopleIcon from '@material-ui/icons/EmojiPeople';
-import TaskItem from './taskitem'
-import './addtask.css';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import './plannerwidget.css';
 
 const useStyles = makeStyles(theme => ({
         card: {
-            minWidth: 100,
-            maxWidth: 300,
+            width: 300,
+            // height: 300
+        },
+        card_content: {
+            backgroundColor: grey[100],
+            // height: 200,
+            // textAlign: "center"
         },
         title: {
             fontSize: 14,
@@ -92,7 +97,7 @@ export default function Today(props) {
         }
     }
 
-    function renderAvatar(category) {
+    function renderCategoryAvatar(category) {
         var avatar_color
         if(category == 'Work') {
             avatar_color='red'
@@ -114,34 +119,72 @@ export default function Today(props) {
         }
     }
 
+    function renderPriorityChip(priority) {
+        var priority_color
+        if(priority == 'High') {
+            priority_color='secondary'
+        }
+        if(priority == 'Medium') {
+            priority_color='primary'
+        }
+        if(priority == 'Low') {
+            priority_color='default'
+        }
+        return (
+            <Chip variant="outlined" color={priority_color} label={priority + " Priority"} />
+        );
+    }
+
+    function renderEffortChip(effort) {
+        var effort_color
+        var effort_suffix = 'hours'
+        var converted_effort = effort
+        if(effort >= 3) {
+            effort_color='secondary'
+        }
+        if(effort < 3) {
+            effort_color='primary'
+        }
+        if(effort < 1) {
+            effort_color='default'
+        }
+        
+        if(effort == 1) effort_suffix = 'hour'
+        if(effort < 1) {
+            converted_effort = effort * 60
+            effort_suffix = 'minutes'
+        }
+
+        return (
+            <Chip size="small" color={effort_color} icon={<AccessTimeIcon />} label={converted_effort + " " + effort_suffix} />
+        );
+    }
+
     function renderTask(task) {
         let taskJson = JSON.parse(task.payload);
-        var avatar_color
-        if(taskJson.category == 'Work') avatar_color='red'
-        if(taskJson.category == 'Home') avatar_color='orange'
-        if(taskJson.category == 'Personal') avatar_color='blue'
         return (
             <Grid key={taskJson.id} item>
             <Card className={classes.card} raised={true}>
-                <CardHeader
-                    avatar={
-                        renderAvatar(taskJson.category)
-                    }
+                <CardHeader 
+                    avatar={renderCategoryAvatar(taskJson.category)}
+                    action={
+                        renderEffortChip(taskJson.effort)
+                      }
                     title={
-                        <Chip variant="outlined" color="secondary" label={taskJson.priority + " Priority"} />
+                        renderPriorityChip(taskJson.priority)
                     }
-                    subheader={
-                        <Chip variant="outlined" color="primary" label={taskJson.effort + " hours"} />
-                    }
+                    // subheader={renderEffortChip(taskJson.effort)
+                        // <Chip variant="outlined" color="primary" label={taskJson.effort + " hours"} />
+                    // }
                 />
-                <CardContent>
+                <CardContent className={classes.card_content}>
                     <Typography variant="h5" component="h2">
                         {taskJson.title}
                     </Typography>
                 </CardContent>
-                <CardActions>
-                    <Button size="small" color="primary">Complete Task</Button>
-                </CardActions>
+                {/* <CardActions> */}
+                    {/* <Button size="small" color="primary">Complete Task</Button> */}
+                {/* </CardActions> */}
           </Card>
           </Grid>
         );

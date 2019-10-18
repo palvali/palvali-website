@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
-import AddTaskContainer from '../containers/AddTaskContainer';
-import ShowTasksContainer from '../containers/ShowTasksContainer';
+import PlannerWidgetContainer from '../containers/PlannerWidgetContainer';
 
 export default class Planner extends Component {
     render() {
         return (
             <div>
-                <ShowTasksContainer></ShowTasksContainer>
-                <br />
-                <AddTaskContainer></AddTaskContainer>
+                <PlannerWidgetContainer></PlannerWidgetContainer>
             </div>
         )
     }

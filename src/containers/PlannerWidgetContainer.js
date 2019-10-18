@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import * as TodoActions from '../actions'
-import ShowTasks from '../components/tasks/showtasks'
+import PlannerWidget from '../components/tasks/plannerwidget'
 import { getAllTodos } from '../selectors'
 
 const mapStateToProps = state => ({
@@ -18,6 +18,6 @@ function mapDispatchToProps(dispatch) {
 const AllTodoList = connect(
   mapStateToProps,
   mapDispatchToProps
-)(ShowTasks)
+)(PlannerWidget)
 
 export default AllTodoList
