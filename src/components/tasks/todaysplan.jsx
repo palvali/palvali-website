@@ -11,24 +11,63 @@ import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
-import { red, lightBlue, grey } from '@material-ui/core/colors';
+import { red, lightBlue, grey, green } from '@material-ui/core/colors';
 import { blue } from '@material-ui/core/colors';
 import { orange } from '@material-ui/core/colors';
 import HomeIcon from '@material-ui/icons/Home';
 import WorkIcon from '@material-ui/icons/Work';
 import EmojiPeopleIcon from '@material-ui/icons/EmojiPeople';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import './plannerwidget.css';
+import LabelIcon from '@material-ui/icons/Label';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
+import IconButton from '@material-ui/core/IconButton';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import ShareIcon from '@material-ui/icons/Share';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import PauseIcon from '@material-ui/icons/Pause';
+import clsx from 'clsx';
+import Grow from '@material-ui/core/Grow';
+import Slide from '@material-ui/core/Slide';
+import './todaysplan.css';
 
 const useStyles = makeStyles(theme => ({
+        title_paper: {
+            backgroundColor: blue[50],
+            padding: theme.spacing(3, 2),
+        },
         card: {
-            width: 300,
+            width: 270,
             // height: 300
+        },
+        open_tasks_card: {
+            backgroundColor: blue[50],
+            padding: theme.spacing(3, 2),
+        },
+        completed_tasks_card: {
+            backgroundColor: grey[200],
+            color: green[900],
+            padding: theme.spacing(3, 2),
+        },
+        completed_card: {
+            width: 270,
+            // background: 'linear-gradient(45deg, #045494 30%, #045494 90%)',
+            background: green[900],
+            color: 'white'
+        },
+        completed_card_content: {
+            // backgroundColor: grey[100],
+            height: 80,
+            // textAlign: "center"
         },
         card_content: {
             backgroundColor: grey[100],
-            // height: 200,
+            height: 110,
             // textAlign: "center"
+        },
+        card_action: {
+            justifyContent: "flex-start"
         },
         title: {
             fontSize: 14,
@@ -41,6 +80,26 @@ const useStyles = makeStyles(theme => ({
         },
         avatar_orange: {
             backgroundColor: orange[500],
+        },
+        button_start: {
+            margin: theme.spacing(1),
+            background: '#01579b',
+            color: 'white',
+        },
+        button_complete: {
+            margin: theme.spacing(1),
+            background: '#388e3c',
+            color: 'white',
+        },
+        expand: {
+            // transform: 'rotate(0deg)',
+            marginLeft: 'auto',
+            // transition: theme.transitions.create('transform', {
+            //     duration: theme.transitions.duration.shortest,
+            // }),
+        },
+        expandOpen: {
+            transform: 'rotate(180deg)',
         },
         root: {
             padding: theme.spacing(3, 2),
@@ -65,36 +124,96 @@ export default function Today(props) {
     const classes = useStyles();
 
     function renderTasks(todaysTasks) {
+        var title = getTitle(todaysTasks)
         if(todaysTasks.length > 0) {
             return (
                 <div>
-                <Paper className={classes.root} elevation={false}>
-                    <Typography variant="h4" component="h4">
-                        {
-                            "You have " + (todaysTasks.length) + " tasks for the day"
-                        }
-                    </Typography>
-                </Paper>
-                <Grid className={classes.root} container spacing={5}>
-                {
-                    todaysTasks.map(renderTask)
-                }
-                </Grid>
+                    { renderOpenTasksTitle(title) }
+                    <Grid className={classes.root} container spacing={5}>
+                    {
+                        todaysTasks.map(renderTask)
+                    }
+                    </Grid>
                 </div>
             );
         } else {
             return (
                 <div>
-                <Paper>
-                    <br />
-                    <Typography variant="h3" component="h3">
-                        Hooray! No tasks today..
-                    </Typography>
-                    <br />
-                </Paper>
+                {renderOpenTasksTitle(title)}
                 </div>
             );
         }
+    }
+
+    function getTitle(todaysTasks) {
+        var title
+        if(todaysTasks.length > 0) {
+            title = "You have " + (todaysTasks.length) + " tasks for the day"
+        } else if(isMorning()) {
+            title = "Good Morning! Plan your day for today and get started."
+        } else if (isAfterWork()) {
+            title = "Good job at work. No open tasks now!"
+        } else {
+            title = timeLeftAtWork() +"hours left at work. Everything done for now!"
+        }
+        return title
+    }
+
+    function renderOpenTasksTitle(title) {
+        return (
+            <Paper className={classes.title_paper} elevation={false}>
+                <Typography variant="h4" component="h4">
+                    {title} { renderDate() }
+                </Typography>
+            </Paper>
+        );
+    }
+
+    function renderDate() {
+        return (
+            <Chip size="large" color="primary" label={new Date().toDateString()} />
+        );
+    }
+
+    function renderCompletedTasks(completedTasks) {
+        if(completedTasks.length > 0) {
+            return (
+                <div>
+                <Paper className={classes.completed_tasks_card} elevation={false}>
+                    <Typography variant="h4" component="h4">
+                        {
+                            "Completed " + (completedTasks.length) + " tasks today.."
+                        }
+                    </Typography>
+                </Paper>
+                <Grid className={classes.root} container spacing={5}>
+                {
+                    completedTasks.map(renderCompletedTask)
+                }
+                </Grid>
+                </div>
+            );
+        }
+    }
+
+    function renderCompletedTask(task) {
+        let taskJson = JSON.parse(task.payload);
+        return (
+            <Grid key={taskJson.id} item>
+                <Slide direction="left" in="true" mountOnEnter unmountOnExit>
+            <Card className={classes.completed_card} raised={true}>
+                <CardContent className={classes.completed_card_content}>
+                    <Typography variant="h5" component="h2">
+                        {taskJson.title}
+                    </Typography>
+                </CardContent>
+                <CardActions>
+                    <Chip size="small"  label={taskJson.category} />
+                </CardActions>
+          </Card>
+          </Slide>
+          </Grid>
+        );
     }
 
     function renderCategoryAvatar(category) {
@@ -103,6 +222,28 @@ export default function Today(props) {
             avatar_color='red'
             return (
                 <StyledAvatar color={avatar_color}> <WorkIcon color="action" /> </StyledAvatar>
+            );
+        }
+        if(category == 'Home') {
+            avatar_color='orange'
+            return (
+                <StyledAvatar color={avatar_color}> <HomeIcon color="action" /> </StyledAvatar>
+            );
+        }
+        if(category == 'Personal') {
+            avatar_color='blue'
+            return (
+                <StyledAvatar color={avatar_color}> <EmojiPeopleIcon color="action" /> </StyledAvatar>
+            );
+        }
+    }
+
+    function renderCategoryChip(category) {
+        var avatar_color
+        if(category == 'Work') {
+            avatar_color='red'
+            return (
+                <LabelIcon color="{avatar_color}"> Work </LabelIcon>
             );
         }
         if(category == 'Home') {
@@ -131,7 +272,7 @@ export default function Today(props) {
             priority_color='default'
         }
         return (
-            <Chip variant="outlined" color={priority_color} label={priority + " Priority"} />
+            <Chip variant="outlined" size="small"  color={priority_color} label={priority + " Priority"} />
         );
     }
 
@@ -160,19 +301,56 @@ export default function Today(props) {
         );
     }
 
+    function renderAction(status) {
+        if(status == "Pending") {
+            return (
+                // <Button 
+                // variant="contained"
+                // color="secondary"
+                // className={classes.button_start}
+                // startIcon={<PlayArrowIcon />}>Start</Button>
+                // <IconButton aria-label="start">
+                    // <PlayArrowIcon />
+                // </IconButton>
+                <StyledAvatar color="default"> <PlayArrowIcon color="action" /> </StyledAvatar>
+            );
+        }
+        if(status == "InProgress") {
+            return (
+                // <Button 
+                // variant="contained"
+                // color="secondary"
+                // className={classes.button_complete}
+                // startIcon={<AssignmentTurnedInIcon />}>Complete</Button>
+                // <IconButton aria-label="in progress">
+                    // <PauseIcon /> 
+                    // <div>
+                    <StyledAvatar color="default"> <PauseIcon color="action" /> </StyledAvatar>
+                    // <Chip variant="outlined" size="small" label="In progress" />
+                    // </div>
+                // </IconButton>
+            );
+        }
+    }
+
     function renderTask(task) {
         let taskJson = JSON.parse(task.payload);
         return (
             <Grid key={taskJson.id} item>
+                 <Slide direction="right" in="true" mountOnEnter unmountOnExit>
             <Card className={classes.card} raised={true}>
                 <CardHeader 
                     avatar={renderCategoryAvatar(taskJson.category)}
                     action={
-                        renderEffortChip(taskJson.effort)
+                        <div align="right">
+                        {renderEffortChip(taskJson.effort)}
+                        <br />
+                        {renderPriorityChip(taskJson.priority)}
+                        </div>
                       }
-                    title={
-                        renderPriorityChip(taskJson.priority)
-                    }
+                    // title={
+                    //     renderPriorityChip(taskJson.priority)
+                    // }
                     // subheader={renderEffortChip(taskJson.effort)
                         // <Chip variant="outlined" color="primary" label={taskJson.effort + " hours"} />
                     // }
@@ -182,12 +360,42 @@ export default function Today(props) {
                         {taskJson.title}
                     </Typography>
                 </CardContent>
-                {/* <CardActions> */}
-                    {/* <Button size="small" color="primary">Complete Task</Button> */}
-                {/* </CardActions> */}
-          </Card>
-          </Grid>
+                {/* <CardActions className={classes.card_action}>
+                    {
+                        renderAction(taskJson.status)
+                    }
+                </CardActions> */}
+                <CardActions disableSpacing>
+                    {
+                        renderAction(taskJson.status)
+                    }
+                    <Chip className={classes.expand} variant="outlined" size="small"  color="secondary" label="Complete" />
+                </CardActions>
+            </Card>
+            </Slide>
+            </Grid>
         );
+    }
+
+    const isMorning = () => {
+        var now = new Date();
+        var morningTime = new Date();
+        morningTime.setHours(11); morningTime.setMinutes(59);
+        return now.getTime() <= morningTime.getTime()
+    }
+
+    const isAfterWork = () => {
+        var now = new Date();
+        var eveningTime = new Date();
+        eveningTime.setHours(17); eveningTime.setMinutes(0);
+        return now.getTime() >= eveningTime.getTime()
+    }
+
+    const timeLeftAtWork = () => {
+        var now = new Date();
+        var eveningTime = new Date();
+        eveningTime.setHours(17); eveningTime.setMinutes(0);
+        return eveningTime.getHours() - now.getHours()
     }
 
     const isToday = (someDate) => {
@@ -207,10 +415,33 @@ export default function Today(props) {
         return todaystasks;
     }
 
+    const isCompleted = (status) => {
+        return status == "Completed"
+    }
+
+    const filterCompletedTasks = (todaysTodos) => {
+        var completedTasks = todaysTodos.filter(function(t) {
+                        return isCompleted(JSON.parse(t.payload).status);
+                    });
+
+        return completedTasks;
+    }
+
+    const filterOpenTasks = (todaysTodos) => {
+        var completedTasks = todaysTodos.filter(function(t) {
+                        return JSON.parse(t.payload).status != "Completed";
+                    });
+
+        return completedTasks;
+    }
+
     function displayAll(allTodos) {
         let todaysTasks = filterTodaysTasks(props.allTodos)
+        let openTodaysTasks = filterOpenTasks(todaysTasks)
+        let completedTodaysTasks = filterCompletedTasks(todaysTasks)
         return [
-            renderTasks(todaysTasks),
+            renderTasks(openTodaysTasks),
+            renderCompletedTasks(completedTodaysTasks)
         ]
     }
 
