@@ -32,7 +32,9 @@ import ComputerIcon from '@material-ui/icons/Computer';
 import clsx from 'clsx';
 import Grow from '@material-ui/core/Grow';
 import Slide from '@material-ui/core/Slide';
+import { addTodo, editTodo, deleteTodo } from '../../actions';
 import './todaysplan.css';
+import { identifier } from '@babel/types';
 
 const useStyles = makeStyles(theme => ({
         title_paper: {
@@ -387,22 +389,50 @@ export default function Today(props) {
         );
     }
 
-    function renderAction(status) {
+    function handleActionChange(id, newStatus, task) {
+        task.status = newStatus
+        editTask(id, task)
+    }
+
+    function renderAction(id, status, task) {
         if(status == "Pending") {
             return (
-                // <Button 
-                // variant="contained"
-                // color="secondary"
-                // className={classes.button_start}
-                // startIcon={<PlayArrowIcon />}>Start</Button>
+                <Button 
+                variant="contained"
+                color="action"
+                className={classes.button_start}
+                startIcon={<PlayArrowIcon />}
+                onClick={() => handleActionChange(id, "InProgress", task)}
+                >
+                    Start
+                </Button>
                 // <IconButton aria-label="start">
                     // <PlayArrowIcon />
                 // </IconButton>
-                <StyledAvatar color="action"> <PlayArrowIcon color="action" /> </StyledAvatar>
+                // <StyledAvatar color="action"> <PlayArrowIcon color="action" onClick={() => handleActionChange("InProgress", task)} /> </StyledAvatar>
             );
         }
         if(status == "InProgress") {
             return (
+                <div>
+                    <Button 
+                variant="contained"
+                color="action"
+                className={classes.button_start}
+                startIcon={<PauseIcon />}
+                onClick={() => handleActionChange(id, "Pending", task)}
+                >
+                </Button>
+                <Button 
+                variant="contained"
+                color="action"
+                className={classes.button_start}
+                startIcon={<AssignmentTurnedInIcon />}
+                onClick={() => handleActionChange(id, "Completed", task)}
+                >
+                    Complete
+                </Button>
+                </div>
                 // <Button 
                 // variant="contained"
                 // color="secondary"
@@ -411,7 +441,7 @@ export default function Today(props) {
                 // <IconButton aria-label="in progress">
                     // <PauseIcon /> 
                     // <div>
-                    <StyledAvatar color="action"> <PauseIcon color="action" /> </StyledAvatar>
+                    // <StyledAvatar color="action"> <PauseIcon color="action" /> </StyledAvatar>
                     // <Chip variant="outlined" size="small" label="In progress" />
                     // </div>
                 // </IconButton>
@@ -422,7 +452,7 @@ export default function Today(props) {
     function renderTask(task) {
         let taskJson = JSON.parse(task.payload);
         return (
-            <Grid key={taskJson.id} item>
+            <Grid key={task.id} item>
                  <Slide direction="right" in="true" mountOnEnter unmountOnExit>
             <Card className={classes.card} raised={true}>
                 <CardHeader 
@@ -453,7 +483,7 @@ export default function Today(props) {
                 </CardActions> */}
                 <CardActions disableSpacing>
                     {
-                        renderAction(taskJson.status)
+                        renderAction(task.id, taskJson.status, taskJson)
                     }
                     {/* <Chip className={classes.expand} variant="outlined" size="small"  color="secondary" label="Complete" /> */}
                 </CardActions>
@@ -461,6 +491,24 @@ export default function Today(props) {
             </Slide>
             </Grid>
         );
+    }
+
+    function formatDate(date) {
+        if(date.toString().length < 12) return date
+  
+        var d = date.getDate();
+        var m = date.getMonth()+1;
+        var y = date.getFullYear();
+  
+        var formattedDate = y+"-"+(m <= 9 ? '0' + m : m)+"-"+(d <= 9 ? '0' + d : d)
+        return formattedDate
+    }
+
+    function editTask(id, payload) {
+        payload.deadline = formatDate(payload.deadline)
+        var jsonPayload = JSON.stringify(payload)
+        console.log("Dispatching: "+jsonPayload+", id: "+id)
+        props.dispatch(editTodo(id, jsonPayload))
     }
 
     const isMorning = () => {

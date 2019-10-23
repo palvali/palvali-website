@@ -115,9 +115,7 @@ export default function PlannerWidget(props) {
     }
 
     function formatDate(date) {
-      console.log("Formatting: "+date)
       var dateStr = date.toString()
-      console.log("FormattingStr: "+dateStr)
       if(date.toString().length < 12) return date
 
       var d = date.getDate();

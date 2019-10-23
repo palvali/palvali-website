@@ -8,10 +8,12 @@ const mapStateToProps = state => ({
   allTodos: getAllTodos(state)
 })
 
-const mapDispatchToProps = dispatch => ({
-  actions: bindActionCreators(TodoActions, dispatch)
-})
-
+function mapDispatchToProps(dispatch) {
+  return {
+    dispatch,
+    ...bindActionCreators(TodoActions, dispatch)
+  }
+}
 
 const TodaysPlan = connect(
   mapStateToProps,
