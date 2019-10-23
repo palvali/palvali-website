@@ -114,11 +114,41 @@ export default function PlannerWidget(props) {
         setData({...data, deadline: event.target.value})
     }
 
+    function formatDate(date) {
+      var d = date.getDate();
+      var m = date.getMonth()+1;
+      var y = date.getFullYear();
+
+      var formattedDate = y+"-"+(m <= 9 ? '0' + m : m)+"-"+(d <= 9 ? '0' + d : d)
+      return formattedDate
+    }
+
+    function getCurrentDate() {
+      var curDate = new Date()
+      return curDate
+    }
+
+    Date.prototype.toJSON = function () {
+      var timezoneOffsetInHours = -(this.getTimezoneOffset() / 60); //UTC minus local time
+      var sign = timezoneOffsetInHours >= 0 ? '+' : '-';
+      var leadingZero = (Math.abs(timezoneOffsetInHours) < 10) ? '0' : '';
+    
+      //It's a bit unfortunate that we need to construct a new Date instance 
+      //(we don't want _this_ Date instance to be modified)
+      var correctedDate = new Date(this.getFullYear(), this.getMonth(), 
+          this.getDate(), this.getHours(), this.getMinutes(), this.getSeconds(), 
+          this.getMilliseconds());
+      correctedDate.setHours(this.getHours() + timezoneOffsetInHours);
+      var iso = correctedDate.toISOString().replace('Z', '');
+    
+      return iso + sign + leadingZero + Math.abs(timezoneOffsetInHours).toString() + ':00';
+    }
+
     function handleSubmit(event) {
       setLoading(true)
       data.status = "Pending";
       if(!data.hasOwnProperty('deadline')) {
-          data.deadline = new Date().toISOString().substr(0,10);
+          data.deadline = formatDate(getCurrentDate())
       }
 
       if(data.followup == true) {
@@ -128,12 +158,14 @@ export default function PlannerWidget(props) {
       event.preventDefault();
       var input = JSON.stringify(data);
 
+      console.log(input)
+
       props.dispatch(addTodo(input))
 
       setLoading(false)
       setData({
           'title':'',
-          'deadline':new Date().toISOString().substr(0,10),
+          'deadline':formatDate(getCurrentDate()),
           'status': '',
           'followup': false
       })
@@ -187,7 +219,7 @@ export default function PlannerWidget(props) {
                         <Col>
                           <InputGroup>
                             <InputGroupAddon className="TaskField" addonType="prepend">complete it by</InputGroupAddon>
-                            <Input className="TaskField" type="date" name="taskDeadline" id="taskDeadline" defaultValue={new Date().toISOString().substr(0,10)}
+                            <Input className="TaskField" type="date" name="taskDeadline" id="taskDeadline" defaultValue={formatDate(getCurrentDate())}
                             value={data.deadline} onChange={handleDeadlineChange}
                             />
                           </InputGroup>
@@ -272,7 +304,7 @@ export default function PlannerWidget(props) {
                 new Promise(resolve => {
                   setTimeout(() => {
                     resolve();
-                    editTask(oldData.id, JSON.stringify(newData))
+                    editTask(oldData.id, newData)
                   }, 600);
                 }),
               onRowDelete: oldData =>
@@ -292,7 +324,7 @@ export default function PlannerWidget(props) {
                     setTimeout(() => {
                       resolve();
                       rowData.status = 'Completed'
-                      editTask(rowData.id, JSON.stringify(rowData))
+                      editTask(rowData.id, rowData)
                     }, 600);
                   }),
                 disabled: rowData.status == 'Completed'
@@ -303,7 +335,9 @@ export default function PlannerWidget(props) {
     }
 
     function editTask(id, payload) {
-        props.dispatch(editTodo(id, payload))
+        payload.deadline = formatDate(payload.deadline)
+        var jsonPayload = JSON.stringify(payload)
+        props.dispatch(editTodo(id, jsonPayload))
     }
 
     function deleteTask(id) {
