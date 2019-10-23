@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/palvali-website/precache-manifest.9d0b01849b3432a143e5bc51b3f233cc.js"
+  "/palvali-website/precache-manifest.ef8d0c4b85c2e4b8302527290136dccb.js"
 );
 
 self.addEventListener('message', (event) => {
