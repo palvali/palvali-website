@@ -115,11 +115,17 @@ export default function PlannerWidget(props) {
     }
 
     function formatDate(date) {
+      console.log("Formatting: "+date)
+      var dateStr = date.toString()
+      console.log("FormattingStr: "+dateStr)
+      if(date.toString().length < 12) return date
+
       var d = date.getDate();
       var m = date.getMonth()+1;
       var y = date.getFullYear();
 
       var formattedDate = y+"-"+(m <= 9 ? '0' + m : m)+"-"+(d <= 9 ? '0' + d : d)
+      console.log("Formatted: "+formattedDate)
       return formattedDate
     }
 
@@ -324,7 +330,7 @@ export default function PlannerWidget(props) {
                     setTimeout(() => {
                       resolve();
                       rowData.status = 'Completed'
-                      editTask(rowData.id, rowData)
+                      completeTask(rowData.id, rowData)
                     }, 600);
                   }),
                 disabled: rowData.status == 'Completed'
@@ -332,6 +338,11 @@ export default function PlannerWidget(props) {
             ]}
           />
         );
+    }
+
+    function completeTask(id, payload) {
+      var jsonPayload = JSON.stringify(payload)
+      props.dispatch(editTodo(id, jsonPayload))
     }
 
     function editTask(id, payload) {

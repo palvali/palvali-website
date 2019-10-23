@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
@@ -27,6 +27,8 @@ import ShareIcon from '@material-ui/icons/Share';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import PauseIcon from '@material-ui/icons/Pause';
+import BusinessIcon from '@material-ui/icons/Business';
+import ComputerIcon from '@material-ui/icons/Computer';
 import clsx from 'clsx';
 import Grow from '@material-ui/core/Grow';
 import Slide from '@material-ui/core/Slide';
@@ -114,24 +116,26 @@ const StyledAvatar = withStyles({
             default: red[500],
             blue: blue[500],
             red: red[500],
+            green: green[500],
             orange: orange[500],
         })
     },
 })(({ classes, color, ...other }) => <Avatar aria-label="recipe" className={classes.root} {...other} />);
-      
+
 
 export default function Today(props) {
     const classes = useStyles();
 
-    function renderTasks(todaysTasks) {
-        var title = getTitle(todaysTasks)
-        if(todaysTasks.length > 0) {
+    function renderTasks(todaysOpenTasks) {
+        var title = getTitle(todaysOpenTasks)
+        if(todaysOpenTasks.length > 0) {
+            var reorderedTasks = reorderTasks(todaysOpenTasks)
             return (
                 <div>
                     { renderOpenTasksTitle(title) }
                     <Grid className={classes.root} container spacing={5}>
                     {
-                        todaysTasks.map(renderTask)
+                        reorderedTasks.map(renderTask)
                     }
                     </Grid>
                 </div>
@@ -139,10 +143,92 @@ export default function Today(props) {
         } else {
             return (
                 <div>
-                {renderOpenTasksTitle(title)}
+                    { renderOpenTasksTitle(title) }
                 </div>
             );
         }
+    }
+
+    function reorderTasks(openTasks) {
+        var reorderedTasks = []
+
+        var dayVal = getDayVal()
+
+        var workTasks = reorder(getTasksByCategory(openTasks, "Work"))
+        var homeTasks = reorder(getTasksByCategory(openTasks, "Home"))
+        var personalTasks = reorder(getTasksByCategory(openTasks, "Personal"))
+        if(dayVal == "AT_WORK") {
+            Array.prototype.push.apply(reorderedTasks, workTasks);
+            Array.prototype.push.apply(reorderedTasks, homeTasks);
+            Array.prototype.push.apply(reorderedTasks, personalTasks);
+        } else if(dayVal == "BEFORE_WORK") {
+            Array.prototype.push.apply(reorderedTasks, homeTasks);
+            Array.prototype.push.apply(reorderedTasks, workTasks);
+            Array.prototype.push.apply(reorderedTasks, personalTasks);
+        } else {
+            Array.prototype.push.apply(reorderedTasks, personalTasks);
+            Array.prototype.push.apply(reorderedTasks, homeTasks);
+            Array.prototype.push.apply(reorderedTasks, workTasks);
+        }
+
+        return reorderedTasks
+    }
+
+    function reorder(openTasks) {
+        var reorderedTasks = []
+
+        var inprogressTasks = getTasksByStatus(openTasks, "InProgress")
+        var pendingTasks = getTasksByStatus(openTasks, "Pending")
+
+        var inprogress_high = getTasksByPriority(inprogressTasks, "High")
+        var inprogress_med = getTasksByPriority(inprogressTasks, "Medium")
+        var inprogress_low = getTasksByPriority(inprogressTasks, "Low")
+
+        var pending_high = getTasksByPriority(pendingTasks, "High")
+        var pending_med = getTasksByPriority(pendingTasks, "Medium")
+        var pending_low = getTasksByPriority(pendingTasks, "Low")
+
+        Array.prototype.push.apply(reorderedTasks, inprogress_high);
+        Array.prototype.push.apply(reorderedTasks, inprogress_med);
+        Array.prototype.push.apply(reorderedTasks, inprogress_low);
+        Array.prototype.push.apply(reorderedTasks, pending_high);
+        Array.prototype.push.apply(reorderedTasks, pending_med);
+        Array.prototype.push.apply(reorderedTasks, pending_low);
+
+        return reorderedTasks
+    }
+
+    function getDayVal() {
+        var dayVal
+        if(isBeforeWork()) dayVal = 'BEFORE_WORK'
+        else if(isAfterWork()) dayVal = 'AFTER_WORK'
+        else dayVal = 'AT_WORK'
+
+        return dayVal
+    }
+
+    function getTasksByCategory(tasks, category) {
+        var filteredTasks = tasks.filter(function(t) {
+            return JSON.parse(t.payload).category == category;
+        });
+
+        return filteredTasks;
+    }
+
+    function getTasksByPriority(tasks, priority) {
+        var filteredTasks = tasks.filter(function(t) {
+            return JSON.parse(t.payload).priority == priority;
+        });
+
+        return filteredTasks;
+    }
+
+    function getTasksByStatus(tasks, status) {
+        var filteredTasks = tasks.filter(function(t) {
+            return JSON.parse(t.payload).status == status;
+        });
+
+        return filteredTasks;
     }
 
     function getTitle(todaysTasks) {
@@ -219,9 +305,9 @@ export default function Today(props) {
     function renderCategoryAvatar(category) {
         var avatar_color
         if(category == 'Work') {
-            avatar_color='red'
+            avatar_color='blue'
             return (
-                <StyledAvatar color={avatar_color}> <WorkIcon color="action" /> </StyledAvatar>
+                <StyledAvatar color={avatar_color}> <ComputerIcon color="action" /> </StyledAvatar>
             );
         }
         if(category == 'Home') {
@@ -231,7 +317,7 @@ export default function Today(props) {
             );
         }
         if(category == 'Personal') {
-            avatar_color='blue'
+            avatar_color='green'
             return (
                 <StyledAvatar color={avatar_color}> <EmojiPeopleIcon color="action" /> </StyledAvatar>
             );
@@ -312,7 +398,7 @@ export default function Today(props) {
                 // <IconButton aria-label="start">
                     // <PlayArrowIcon />
                 // </IconButton>
-                <StyledAvatar color="default"> <PlayArrowIcon color="action" /> </StyledAvatar>
+                <StyledAvatar color="action"> <PlayArrowIcon color="action" /> </StyledAvatar>
             );
         }
         if(status == "InProgress") {
@@ -325,7 +411,7 @@ export default function Today(props) {
                 // <IconButton aria-label="in progress">
                     // <PauseIcon /> 
                     // <div>
-                    <StyledAvatar color="default"> <PauseIcon color="action" /> </StyledAvatar>
+                    <StyledAvatar color="action"> <PauseIcon color="action" /> </StyledAvatar>
                     // <Chip variant="outlined" size="small" label="In progress" />
                     // </div>
                 // </IconButton>
@@ -369,7 +455,7 @@ export default function Today(props) {
                     {
                         renderAction(taskJson.status)
                     }
-                    <Chip className={classes.expand} variant="outlined" size="small"  color="secondary" label="Complete" />
+                    {/* <Chip className={classes.expand} variant="outlined" size="small"  color="secondary" label="Complete" /> */}
                 </CardActions>
             </Card>
             </Slide>
@@ -382,6 +468,13 @@ export default function Today(props) {
         var morningTime = new Date();
         morningTime.setHours(11); morningTime.setMinutes(59);
         return now.getTime() <= morningTime.getTime()
+    }
+
+    const isBeforeWork = () => {
+        var now = new Date();
+        var workStartTime = new Date();
+        workStartTime.setHours(9); workStartTime.setMinutes(0);
+        return now.getTime() < workStartTime.getTime()
     }
 
     const isAfterWork = () => {
