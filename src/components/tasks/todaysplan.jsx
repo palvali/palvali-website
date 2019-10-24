@@ -32,6 +32,7 @@ import ComputerIcon from '@material-ui/icons/Computer';
 import clsx from 'clsx';
 import Grow from '@material-ui/core/Grow';
 import Slide from '@material-ui/core/Slide';
+import Divider from '@material-ui/core/Divider';
 import { addTodo, editTodo, deleteTodo } from '../../actions';
 import './todaysplan.css';
 import { identifier } from '@babel/types';
@@ -86,9 +87,9 @@ const useStyles = makeStyles(theme => ({
             backgroundColor: orange[500],
         },
         button_start: {
-            margin: theme.spacing(1),
-            background: '#01579b',
-            color: 'white',
+            // margin: theme.spacing(1),
+            // background: '#01579b',
+            color: 'black',
         },
         button_complete: {
             margin: theme.spacing(1),
@@ -235,25 +236,39 @@ export default function Today(props) {
 
     function getTitle(todaysTasks) {
         var title
+        var timeLeft = timeLeftAtWork()
         if(todaysTasks.length > 0) {
-            title = "You have " + (todaysTasks.length) + " tasks for the day"
+            title = "You have " + (todaysTasks.length) + " tasks for the day."
+            if(timeLeft > 0) {
+                title += " " + timeLeft + " hours left at work."
+            }
         } else if(isMorning()) {
             title = "Good Morning! Plan your day for today and get started."
         } else if (isAfterWork()) {
             title = "Good job at work. No open tasks now!"
         } else {
-            title = timeLeftAtWork() +"hours left at work. Everything done for now!"
+            title = timeLeftAtWork() +" hours left at work. Everything done for now!"
         }
         return title
     }
 
     function renderOpenTasksTitle(title) {
         return (
-            <Paper className={classes.title_paper} elevation={false}>
-                <Typography variant="h4" component="h4">
-                    {title} { renderDate() }
-                </Typography>
-            </Paper>
+            <Grid justify='space-between' container className={classes.title_paper}>
+                <Grid item>
+                    <Typography variant="h4" component="h4">
+                        { title }
+                    </Typography>
+                </Grid>
+                <Grid item>
+                    { renderDate() }
+                </Grid>
+            </Grid>
+            // <Paper className={classes.title_paper} elevation={false}>
+            //     <Typography variant="h4" component="h4">
+            //         {title} { renderDate() }
+            //     </Typography>
+            // </Paper>
         );
     }
 
@@ -398,53 +413,30 @@ export default function Today(props) {
         if(status == "Pending") {
             return (
                 <Button 
-                variant="contained"
-                color="action"
                 className={classes.button_start}
                 startIcon={<PlayArrowIcon />}
                 onClick={() => handleActionChange(id, "InProgress", task)}
                 >
                     Start
                 </Button>
-                // <IconButton aria-label="start">
-                    // <PlayArrowIcon />
-                // </IconButton>
-                // <StyledAvatar color="action"> <PlayArrowIcon color="action" onClick={() => handleActionChange("InProgress", task)} /> </StyledAvatar>
             );
         }
         if(status == "InProgress") {
             return (
-                <div>
+                <Grid container justify='space-between'>
                     <Button 
-                variant="contained"
-                color="action"
-                className={classes.button_start}
-                startIcon={<PauseIcon />}
-                onClick={() => handleActionChange(id, "Pending", task)}
-                >
-                </Button>
-                <Button 
-                variant="contained"
-                color="action"
-                className={classes.button_start}
-                startIcon={<AssignmentTurnedInIcon />}
-                onClick={() => handleActionChange(id, "Completed", task)}
-                >
-                    Complete
-                </Button>
-                </div>
-                // <Button 
-                // variant="contained"
-                // color="secondary"
-                // className={classes.button_complete}
-                // startIcon={<AssignmentTurnedInIcon />}>Complete</Button>
-                // <IconButton aria-label="in progress">
-                    // <PauseIcon /> 
-                    // <div>
-                    // <StyledAvatar color="action"> <PauseIcon color="action" /> </StyledAvatar>
-                    // <Chip variant="outlined" size="small" label="In progress" />
-                    // </div>
-                // </IconButton>
+                        className={classes.button_start}
+                        startIcon={<PauseIcon />}
+                        onClick={() => handleActionChange(id, "Pending", task)}>
+                        Pause
+                    </Button>
+                    <Button 
+                        className={classes.button_start}
+                        startIcon={<AssignmentTurnedInIcon />}
+                        onClick={() => handleActionChange(id, "Completed", task)}>
+                        Complete
+                    </Button>
+                </Grid>
             );
         }
     }
