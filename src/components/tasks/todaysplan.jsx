@@ -69,7 +69,13 @@ const useStyles = makeStyles(theme => ({
         card_content: {
             backgroundColor: grey[100],
             height: 110,
-            // textAlign: "center"
+            // fontFamily: ['Karla','sans-serif']
+        },
+        font_style: {
+            fontFamily: ['Montserrat','sans-serif']
+        },
+        action_font_style: {
+            fontFamily: ['Karla','sans-serif']
         },
         card_action: {
             justifyContent: "flex-start"
@@ -238,9 +244,18 @@ export default function Today(props) {
         var title
         var timeLeft = timeLeftAtWork()
         if(todaysTasks.length > 0) {
+            var numTasks = 0
             title = "You have " + (todaysTasks.length) + " tasks for the day."
-            if(timeLeft > 0) {
-                title += " " + timeLeft + " hours left at work."
+            if(isAtWork() && timeLeft > 0) {
+                numTasks = getTasksByCategory(todaysTasks, "Work").length
+                if (numTasks == 0) {
+                    title = "Plan your day at work."
+                } else {
+                    title = "You have " + (numTasks)
+                    if(numTasks == 1) title += " task at work."
+                    else title += " tasks at work."
+                }
+                title += " " + timeLeft + " hours left."
             }
         } else if(isMorning()) {
             title = "Good Morning! Plan your day for today and get started."
@@ -256,7 +271,7 @@ export default function Today(props) {
         return (
             <Grid justify='space-between' container className={classes.title_paper}>
                 <Grid item>
-                    <Typography variant="h4" component="h4">
+                    <Typography variant="h4" component="h4" className={classes.font_style}>
                         { title }
                     </Typography>
                 </Grid>
@@ -264,17 +279,12 @@ export default function Today(props) {
                     { renderDate() }
                 </Grid>
             </Grid>
-            // <Paper className={classes.title_paper} elevation={false}>
-            //     <Typography variant="h4" component="h4">
-            //         {title} { renderDate() }
-            //     </Typography>
-            // </Paper>
         );
     }
 
     function renderDate() {
         return (
-            <Chip size="large" color="primary" label={new Date().toDateString()} />
+            <Chip size="medium" color="primary" className={classes.font_style} label={new Date().toDateString()} />
         );
     }
 
@@ -283,7 +293,7 @@ export default function Today(props) {
             return (
                 <div>
                 <Paper className={classes.completed_tasks_card} elevation={false}>
-                    <Typography variant="h4" component="h4">
+                    <Typography variant="h4" component="h4" className={classes.font_style}>
                         {
                             "Completed " + (completedTasks.length) + " tasks today.."
                         }
@@ -306,12 +316,12 @@ export default function Today(props) {
                 <Slide direction="left" in="true" mountOnEnter unmountOnExit>
             <Card className={classes.completed_card} raised={true}>
                 <CardContent className={classes.completed_card_content}>
-                    <Typography variant="h5" component="h2">
+                    <Typography variant="h5" component="h2" className={classes.font_style}>
                         {taskJson.title}
                     </Typography>
                 </CardContent>
                 <CardActions>
-                    <Chip size="small"  label={taskJson.category} />
+                    <Chip size="small" className={classes.font_style} label={taskJson.category} />
                 </CardActions>
           </Card>
           </Slide>
@@ -341,28 +351,6 @@ export default function Today(props) {
         }
     }
 
-    function renderCategoryChip(category) {
-        var avatar_color
-        if(category == 'Work') {
-            avatar_color='red'
-            return (
-                <LabelIcon color="{avatar_color}"> Work </LabelIcon>
-            );
-        }
-        if(category == 'Home') {
-            avatar_color='orange'
-            return (
-                <StyledAvatar color={avatar_color}> <HomeIcon color="action" /> </StyledAvatar>
-            );
-        }
-        if(category == 'Personal') {
-            avatar_color='blue'
-            return (
-                <StyledAvatar color={avatar_color}> <EmojiPeopleIcon color="action" /> </StyledAvatar>
-            );
-        }
-    }
-
     function renderPriorityChip(priority) {
         var priority_color
         if(priority == 'High') {
@@ -375,7 +363,7 @@ export default function Today(props) {
             priority_color='default'
         }
         return (
-            <Chip variant="outlined" size="small"  color={priority_color} label={priority + " Priority"} />
+            <Chip variant="outlined" className={classes.font_style} size="small"  color={priority_color} label={priority + " Priority"} />
         );
     }
 
@@ -400,7 +388,7 @@ export default function Today(props) {
         }
 
         return (
-            <Chip size="small" color={effort_color} icon={<AccessTimeIcon />} label={converted_effort + " " + effort_suffix} />
+            <Chip size="small" className={classes.font_style} color={effort_color} icon={<AccessTimeIcon />} label={converted_effort + " " + effort_suffix} />
         );
     }
 
@@ -417,7 +405,9 @@ export default function Today(props) {
                 startIcon={<PlayArrowIcon />}
                 onClick={() => handleActionChange(id, "InProgress", task)}
                 >
-                    Start
+                    <Typography className={classes.action_font_style}>
+                        Start
+                    </Typography>
                 </Button>
             );
         }
@@ -428,13 +418,17 @@ export default function Today(props) {
                         className={classes.button_start}
                         startIcon={<PauseIcon />}
                         onClick={() => handleActionChange(id, "Pending", task)}>
-                        Pause
+                            <Typography className={classes.action_font_style}>
+                                Pause
+                            </Typography>
                     </Button>
                     <Button 
                         className={classes.button_start}
                         startIcon={<AssignmentTurnedInIcon />}
                         onClick={() => handleActionChange(id, "Completed", task)}>
-                        Complete
+                            <Typography className={classes.action_font_style}>
+                                Complete
+                            </Typography>
                     </Button>
                 </Grid>
             );
@@ -445,42 +439,30 @@ export default function Today(props) {
         let taskJson = JSON.parse(task.payload);
         return (
             <Grid key={task.id} item>
-                 <Slide direction="right" in="true" mountOnEnter unmountOnExit>
-            <Card className={classes.card} raised={true}>
-                <CardHeader 
-                    avatar={renderCategoryAvatar(taskJson.category)}
-                    action={
-                        <div align="right">
-                        {renderEffortChip(taskJson.effort)}
-                        <br />
-                        {renderPriorityChip(taskJson.priority)}
-                        </div>
-                      }
-                    // title={
-                    //     renderPriorityChip(taskJson.priority)
-                    // }
-                    // subheader={renderEffortChip(taskJson.effort)
-                        // <Chip variant="outlined" color="primary" label={taskJson.effort + " hours"} />
-                    // }
-                />
-                <CardContent className={classes.card_content}>
-                    <Typography variant="h5" component="h2">
-                        {taskJson.title}
-                    </Typography>
-                </CardContent>
-                {/* <CardActions className={classes.card_action}>
-                    {
-                        renderAction(taskJson.status)
-                    }
-                </CardActions> */}
-                <CardActions disableSpacing>
-                    {
-                        renderAction(task.id, taskJson.status, taskJson)
-                    }
-                    {/* <Chip className={classes.expand} variant="outlined" size="small"  color="secondary" label="Complete" /> */}
-                </CardActions>
-            </Card>
-            </Slide>
+                <Slide direction="right" in="true" mountOnEnter unmountOnExit>
+                    <Card className={classes.card} raised={true}>
+                        <CardHeader 
+                            avatar={renderCategoryAvatar(taskJson.category)}
+                            action={
+                                <div align="right">
+                                    {renderEffortChip(taskJson.effort)}
+                                    <br />
+                                    {renderPriorityChip(taskJson.priority)}
+                                </div>
+                            }
+                        />
+                        <CardContent className={classes.card_content}>
+                            <Typography variant="h5" component="h2" className={classes.font_style}>
+                                {taskJson.title}
+                            </Typography>
+                        </CardContent>
+                        <CardActions disableSpacing>
+                        {
+                            renderAction(task.id, taskJson.status, taskJson)
+                        }
+                        </CardActions>
+                    </Card>
+                </Slide>
             </Grid>
         );
     }
@@ -499,7 +481,6 @@ export default function Today(props) {
     function editTask(id, payload) {
         payload.deadline = formatDate(payload.deadline)
         var jsonPayload = JSON.stringify(payload)
-        console.log("Dispatching: "+jsonPayload+", id: "+id)
         props.dispatch(editTodo(id, jsonPayload))
     }
 
@@ -508,6 +489,15 @@ export default function Today(props) {
         var morningTime = new Date();
         morningTime.setHours(11); morningTime.setMinutes(59);
         return now.getTime() <= morningTime.getTime()
+    }
+
+    const isAtWork = () => {
+        var now = new Date();
+        var workStartTime = new Date();
+        workStartTime.setHours(9); workStartTime.setMinutes(0);
+        var workEndTime = new Date();
+        workEndTime.setHours(17); workEndTime.setMinutes(0);
+        return now.getTime() >= workStartTime.getTime() && now.getTime() <= workEndTime.getTime()
     }
 
     const isBeforeWork = () => {

@@ -1,13 +1,14 @@
 .Card {
     width:"96%";
+    font-family: 'Karla', sans-serif;
 }
 
-.CardTitle {
-    font-family: 'Karla', sans-serif;
+.CardContent {
+    font-family: 'Montserrat', sans-serif;
     font-size: xx-large;
     text-align: left;
 }
-  
+
 .TaskField {
     font-family: 'Montserrat', sans-serif;
     font-size: large;
