@@ -6,36 +6,23 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
-import { red, lightBlue, grey, green } from '@material-ui/core/colors';
+import { red, grey, green } from '@material-ui/core/colors';
 import { blue } from '@material-ui/core/colors';
 import { orange } from '@material-ui/core/colors';
 import HomeIcon from '@material-ui/icons/Home';
-import WorkIcon from '@material-ui/icons/Work';
 import EmojiPeopleIcon from '@material-ui/icons/EmojiPeople';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import LabelIcon from '@material-ui/icons/Label';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
-import IconButton from '@material-ui/core/IconButton';
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import ShareIcon from '@material-ui/icons/Share';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import PauseIcon from '@material-ui/icons/Pause';
-import BusinessIcon from '@material-ui/icons/Business';
 import ComputerIcon from '@material-ui/icons/Computer';
-import clsx from 'clsx';
-import Grow from '@material-ui/core/Grow';
 import Slide from '@material-ui/core/Slide';
-import Divider from '@material-ui/core/Divider';
-import { addTodo, editTodo, deleteTodo } from '../../actions';
+import { editTodo } from '../../actions';
 import './todaysplan.css';
-import { identifier } from '@babel/types';
 
 const useStyles = makeStyles(theme => ({
         title_paper: {
@@ -44,32 +31,14 @@ const useStyles = makeStyles(theme => ({
         },
         card: {
             width: 270,
-            // height: 300
         },
         open_tasks_card: {
             backgroundColor: blue[50],
             padding: theme.spacing(3, 2),
         },
-        completed_tasks_card: {
-            backgroundColor: grey[200],
-            color: green[900],
-            padding: theme.spacing(3, 2),
-        },
-        completed_card: {
-            width: 270,
-            // background: 'linear-gradient(45deg, #045494 30%, #045494 90%)',
-            background: green[900],
-            color: 'white'
-        },
-        completed_card_content: {
-            // backgroundColor: grey[100],
-            height: 80,
-            // textAlign: "center"
-        },
         card_content: {
             backgroundColor: grey[100],
             height: 110,
-            // fontFamily: ['Karla','sans-serif']
         },
         font_style: {
             fontFamily: ['Montserrat','sans-serif']
@@ -93,8 +62,6 @@ const useStyles = makeStyles(theme => ({
             backgroundColor: orange[500],
         },
         button_start: {
-            // margin: theme.spacing(1),
-            // background: '#01579b',
             color: 'black',
         },
         button_complete: {
@@ -103,11 +70,7 @@ const useStyles = makeStyles(theme => ({
             color: 'white',
         },
         expand: {
-            // transform: 'rotate(0deg)',
             marginLeft: 'auto',
-            // transition: theme.transitions.create('transform', {
-            //     duration: theme.transitions.duration.shortest,
-            // }),
         },
         expandOpen: {
             transform: 'rotate(180deg)',
@@ -242,25 +205,28 @@ export default function Today(props) {
 
     function getTitle(todaysTasks) {
         var title
+        var numTodaysTasks = todaysTasks.length
+        var numTasksAtWork = getTasksByCategory(todaysTasks, "Work").length
         var timeLeft = timeLeftAtWork()
-        if(todaysTasks.length > 0) {
-            var numTasks = 0
-            title = "You have " + (todaysTasks.length) + " tasks for the day."
-            if(isAtWork() && timeLeft > 0) {
-                numTasks = getTasksByCategory(todaysTasks, "Work").length
-                if (numTasks == 0) {
+        if(numTodaysTasks > 0) {
+            if(isAtWork()) {
+                if (numTasksAtWork == 0) {
                     title = "Plan your day at work."
                 } else {
-                    title = "You have " + (numTasks)
-                    if(numTasks == 1) title += " task at work."
-                    else title += " tasks at work."
+                    title = "You have " + (numTasksAtWork) + " "
+                    title += (numTasksAtWork == 1) ? "task" : "tasks"
+                    title += " at work."
                 }
                 title += " " + timeLeft + " hours left."
+            } else {
+                title = "You have " + (numTodaysTasks) + " "
+                title += (numTodaysTasks == 1) ? "task" : "tasks"
+                title += " for the day."
             }
         } else if(isMorning()) {
             title = "Good Morning! Plan your day for today and get started."
         } else if (isAfterWork()) {
-            title = "Good job at work. No open tasks now!"
+            title = "No open tasks now!"
         } else {
             title = timeLeftAtWork() +" hours left at work. Everything done for now!"
         }
@@ -285,47 +251,6 @@ export default function Today(props) {
     function renderDate() {
         return (
             <Chip size="medium" color="primary" className={classes.font_style} label={new Date().toDateString()} />
-        );
-    }
-
-    function renderCompletedTasks(completedTasks) {
-        if(completedTasks.length > 0) {
-            return (
-                <div>
-                <Paper className={classes.completed_tasks_card} elevation={false}>
-                    <Typography variant="h4" component="h4" className={classes.font_style}>
-                        {
-                            "Completed " + (completedTasks.length) + " tasks today.."
-                        }
-                    </Typography>
-                </Paper>
-                <Grid className={classes.root} container spacing={5}>
-                {
-                    completedTasks.map(renderCompletedTask)
-                }
-                </Grid>
-                </div>
-            );
-        }
-    }
-
-    function renderCompletedTask(task) {
-        let taskJson = JSON.parse(task.payload);
-        return (
-            <Grid key={taskJson.id} item>
-                <Slide direction="left" in="true" mountOnEnter unmountOnExit>
-            <Card className={classes.completed_card} raised={true}>
-                <CardContent className={classes.completed_card_content}>
-                    <Typography variant="h5" component="h2" className={classes.font_style}>
-                        {taskJson.title}
-                    </Typography>
-                </CardContent>
-                <CardActions>
-                    <Chip size="small" className={classes.font_style} label={taskJson.category} />
-                </CardActions>
-          </Card>
-          </Slide>
-          </Grid>
         );
     }
 
@@ -538,18 +463,6 @@ export default function Today(props) {
         return todaystasks;
     }
 
-    const isCompleted = (status) => {
-        return status == "Completed"
-    }
-
-    const filterCompletedTasks = (todaysTodos) => {
-        var completedTasks = todaysTodos.filter(function(t) {
-                        return isCompleted(JSON.parse(t.payload).status);
-                    });
-
-        return completedTasks;
-    }
-
     const filterOpenTasks = (todaysTodos) => {
         var completedTasks = todaysTodos.filter(function(t) {
                         return JSON.parse(t.payload).status != "Completed";
@@ -561,11 +474,9 @@ export default function Today(props) {
     function displayAll(allTodos) {
         let todaysTasks = filterTodaysTasks(props.allTodos)
         let openTodaysTasks = filterOpenTasks(todaysTasks)
-        let completedTodaysTasks = filterCompletedTasks(todaysTasks)
-        return [
-            renderTasks(openTodaysTasks),
-            renderCompletedTasks(completedTodaysTasks)
-        ]
+        return (
+            renderTasks(openTodaysTasks)
+        )
     }
 
     return <div className="task-list">
