@@ -36,6 +36,9 @@ const useStyles = makeStyles(theme => ({
             backgroundColor: blue[50],
             padding: theme.spacing(3, 2),
         },
+        followup_task_card_header: {
+            backgroundColor: grey[400],
+        },
         card_content: {
             backgroundColor: grey[100],
             height: 110,
@@ -100,25 +103,17 @@ export default function Today(props) {
 
     function renderTasks(todaysOpenTasks) {
         var title = getTitle(todaysOpenTasks)
-        if(todaysOpenTasks.length > 0) {
-            var reorderedTasks = reorderTasks(todaysOpenTasks)
-            return (
-                <div>
-                    { renderOpenTasksTitle(title) }
-                    <Grid className={classes.root} container spacing={5}>
-                    {
-                        reorderedTasks.map(renderTask)
-                    }
-                    </Grid>
-                </div>
-            );
-        } else {
-            return (
-                <div>
-                    { renderOpenTasksTitle(title) }
-                </div>
-            );
-        }
+        var reorderedTasks = reorderTasks(todaysOpenTasks)
+        return (
+            <div>
+                { renderOpenTasksTitle(title) }
+                <Grid className={classes.root} container spacing={5}>
+                {
+                    reorderedTasks.map(renderTask)
+                }
+                </Grid>
+            </div>
+        );
     }
 
     function reorderTasks(openTasks) {
@@ -168,6 +163,80 @@ export default function Today(props) {
         Array.prototype.push.apply(reorderedTasks, pending_low);
 
         return reorderedTasks
+    }
+
+    function renderTask(task) {
+        let taskJson = JSON.parse(task.payload);
+        if(taskJson.effort < 1) {
+            return (
+                renderFollowupTask(task)
+            )
+        } else {
+        return (
+            <Grid key={task.id} item>
+                <Slide direction="right" in="true" mountOnEnter unmountOnExit>
+                    <Card className={classes.card} raised={true}>
+                        <CardHeader 
+                            avatar={renderCategoryAvatar(taskJson.category)}
+                            action={
+                                <div align="right">
+                                    {renderEffortChip(taskJson.effort)}
+                                    <br />
+                                    {renderPriorityChip(taskJson.priority)}
+                                </div>
+                            }
+                        />
+                        <CardContent className={classes.card_content}>
+                            <Typography variant="h5" component="h2" className={classes.font_style}>
+                                {taskJson.title}
+                            </Typography>
+                        </CardContent>
+                        <CardActions disableSpacing>
+                        {
+                            renderAction(task.id, taskJson.status, taskJson)
+                        }
+                        </CardActions>
+                    </Card>
+                </Slide>
+            </Grid>
+            );
+        }
+    }
+
+    function renderFollowupTask(task) {
+        let taskJson = JSON.parse(task.payload);
+        return (
+            <Grid key={task.id} item>
+                <Slide direction="right" in="true" mountOnEnter unmountOnExit>
+                    <Card className={classes.card} raised={true}>
+                        <CardHeader 
+                            className={classes.followup_task_card_header}
+                            avatar={renderCategoryAvatar(taskJson.category)}
+                            title={
+                                <Typography variant="h5" component="h5" className={classes.font_style}>
+                                    Follow-up
+                                </Typography>
+                            }
+                        />
+                        <CardContent className={classes.card_content}>
+                            <Typography variant="h5" component="h2" className={classes.font_style}>
+                                {taskJson.title}
+                            </Typography>
+                        </CardContent>
+                        <CardActions disableSpacing>
+                            <Button 
+                                className={classes.button_start}
+                                startIcon={<AssignmentTurnedInIcon />}
+                                onClick={() => handleActionChange(task.id, "Completed", taskJson)}>
+                                <Typography className={classes.action_font_style}>
+                                    Done
+                                </Typography>
+                            </Button>
+                        </CardActions>
+                    </Card>
+                </Slide>
+            </Grid>
+        );
     }
 
     function getDayVal() {
@@ -360,38 +429,6 @@ export default function Today(props) {
         }
     }
 
-    function renderTask(task) {
-        let taskJson = JSON.parse(task.payload);
-        return (
-            <Grid key={task.id} item>
-                <Slide direction="right" in="true" mountOnEnter unmountOnExit>
-                    <Card className={classes.card} raised={true}>
-                        <CardHeader 
-                            avatar={renderCategoryAvatar(taskJson.category)}
-                            action={
-                                <div align="right">
-                                    {renderEffortChip(taskJson.effort)}
-                                    <br />
-                                    {renderPriorityChip(taskJson.priority)}
-                                </div>
-                            }
-                        />
-                        <CardContent className={classes.card_content}>
-                            <Typography variant="h5" component="h2" className={classes.font_style}>
-                                {taskJson.title}
-                            </Typography>
-                        </CardContent>
-                        <CardActions disableSpacing>
-                        {
-                            renderAction(task.id, taskJson.status, taskJson)
-                        }
-                        </CardActions>
-                    </Card>
-                </Slide>
-            </Grid>
-        );
-    }
-
     function formatDate(date) {
         if(date.toString().length < 12) return date
   
@@ -472,7 +509,7 @@ export default function Today(props) {
     }
 
     function displayAll(allTodos) {
-        let todaysTasks = filterTodaysTasks(props.allTodos)
+        let todaysTasks = filterTodaysTasks(allTodos)
         let openTodaysTasks = filterOpenTasks(todaysTasks)
         return (
             renderTasks(openTodaysTasks)
