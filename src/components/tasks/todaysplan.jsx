@@ -101,15 +101,21 @@ const StyledAvatar = withStyles({
 export default function Today(props) {
     const classes = useStyles();
 
-    function renderTasks(todaysOpenTasks) {
+    function renderTasks(oldOpenTasks, todaysOpenTasks) {
         var title = getTitle(todaysOpenTasks)
+        var reorderedOldTasks = reorderTasks(oldOpenTasks)
         var reorderedTasks = reorderTasks(todaysOpenTasks)
+
+        var allTasks = []
+        Array.prototype.push.apply(allTasks, reorderedOldTasks);
+        Array.prototype.push.apply(allTasks, reorderedTasks);
+
         return (
             <div>
                 { renderOpenTasksTitle(title) }
                 <Grid className={classes.root} container spacing={5}>
                 {
-                    reorderedTasks.map(renderTask)
+                    allTasks.map(renderTask)
                 }
                 </Grid>
             </div>
@@ -172,14 +178,24 @@ export default function Today(props) {
                 renderFollowupTask(task)
             )
         } else {
+            return (
+                renderOpenTask(task)
+            )
+        }
+    }
+
+    function renderOpenTask(task) {
+        let taskJson = JSON.parse(task.payload);
         return (
             <Grid key={task.id} item>
-                <Slide direction="right" in="true" mountOnEnter unmountOnExit>
+                <Slide direction="right" in="false" mountOnEnter unmountOnExit>
                     <Card className={classes.card} raised={true}>
                         <CardHeader 
                             avatar={renderCategoryAvatar(taskJson.category)}
                             action={
                                 <div align="right">
+                                    {renderDeadlineWarningChip(taskJson)}
+                                    <br />
                                     {renderEffortChip(taskJson.effort)}
                                     <br />
                                     {renderPriorityChip(taskJson.priority)}
@@ -200,7 +216,6 @@ export default function Today(props) {
                 </Slide>
             </Grid>
             );
-        }
     }
 
     function renderFollowupTask(task) {
@@ -345,6 +360,20 @@ export default function Today(props) {
         }
     }
 
+    function renderDeadlineWarningChip(taskJson) {
+        if(isToday(taskJson.deadline)) {
+            return (
+                <Chip className={classes.font_style} size="small"  color="primary" 
+                label="Today" />
+            );
+        } else {
+            return (
+                <Chip className={classes.font_style} size="small"  color="secondary" 
+                label= {daysLeft(taskJson.deadline) + " days late"} />
+            );
+        }
+    }
+
     function renderPriorityChip(priority) {
         var priority_color
         if(priority == 'High') {
@@ -446,6 +475,13 @@ export default function Today(props) {
         props.dispatch(editTodo(id, jsonPayload))
     }
 
+    const daysLeft = (deadline) => {
+        var parts = deadline.split('-')
+        var mydate = new Date(parts[0], parts[1] - 1, parts[2]); 
+        var now = new Date();
+        return now.getDate() - mydate.getDate()
+    }
+
     const isMorning = () => {
         var now = new Date();
         var morningTime = new Date();
@@ -492,6 +528,15 @@ export default function Today(props) {
             mydate.getFullYear() == today.getFullYear()
     }
 
+    const filterOldOpenTasks = (allTodos) => {
+        var oldOpen = allTodos.filter(function(t) {
+                        return isToday(JSON.parse(t.payload).deadline) == false && 
+                        JSON.parse(t.payload).status != "Completed"
+                    });
+
+        return oldOpen;
+    }
+
     const filterTodaysTasks = (allTodos) => {
         var todaystasks = allTodos.filter(function(t) {
                         return isToday(JSON.parse(t.payload).deadline);
@@ -511,8 +556,9 @@ export default function Today(props) {
     function displayAll(allTodos) {
         let todaysTasks = filterTodaysTasks(allTodos)
         let openTodaysTasks = filterOpenTasks(todaysTasks)
+        let oldOpenTasks = filterOldOpenTasks(allTodos)
         return (
-            renderTasks(openTodaysTasks)
+            renderTasks(oldOpenTasks, openTodaysTasks)
         )
     }
 
