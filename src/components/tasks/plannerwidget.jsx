@@ -264,8 +264,29 @@ export default function PlannerWidget(props) {
       )
     }
 
+  const isPast = (someDate) => {
+      const today = new Date()
+      var parts = someDate.split('-')
+      var mydate = new Date(parts[0], parts[1] - 1, parts[2]); 
+      today.setHours(0)
+      today.setMinutes(0)
+      today.setSeconds(0)
+      today.setMilliseconds(0)
+      return mydate < today
+  }
+
+  const filterData = (allTasks) => {
+      var filtered_data = allTasks.filter(function(t) {
+                      return JSON.parse(t.payload).status != "Completed"
+                      || !isPast(JSON.parse(t.payload).deadline)
+                  });
+
+      return filtered_data;
+  }
+
   function renderAllTasks(allTasks) {
-      var tr_data = transformData(allTasks)
+      var filtered_data = filterData(allTasks)
+      var tr_data = transformData(filtered_data)
 
       const table_data = {
           columns: [

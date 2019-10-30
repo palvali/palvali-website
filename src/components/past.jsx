@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
+import PastWidgetContainer from '../containers/PastWidgetContainer';
 
 export default class Past extends Component {
     render() {
         return (
-            <center>
             <div>
-                This is past.
+                <PastWidgetContainer></PastWidgetContainer>
             </div>
-            </center>
         )
     }
 }

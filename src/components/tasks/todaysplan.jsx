@@ -20,6 +20,7 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import PauseIcon from '@material-ui/icons/Pause';
 import ComputerIcon from '@material-ui/icons/Computer';
+import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
 import Slide from '@material-ui/core/Slide';
 import { editTodo } from '../../actions';
 import './todaysplan.css';
@@ -72,6 +73,11 @@ const useStyles = makeStyles(theme => ({
             background: '#388e3c',
             color: 'white',
         },
+        button_show_other_tasks: {
+            color: 'black',
+            margin: theme.spacing(1),
+
+        },
         expand: {
             marginLeft: 'auto',
         },
@@ -101,8 +107,15 @@ const StyledAvatar = withStyles({
 export default function Today(props) {
     const classes = useStyles();
 
+    const [showNonWorkTasks, setShowNonWorkTasks] = useState(true);
+    const [showNonWorkTasksTitle, setShowNonWorkTasksTitle] = useState('Hide');
+
+    useEffect(() => {
+        if(showNonWorkTasks) setShowNonWorkTasksTitle('Hide')
+        else setShowNonWorkTasksTitle('Show')
+      });
+
     function renderTasks(oldOpenTasks, todaysOpenTasks) {
-        var title = getTitle(todaysOpenTasks)
         var reorderedOldTasks = reorderTasks(oldOpenTasks)
         var reorderedTasks = reorderTasks(todaysOpenTasks)
 
@@ -110,12 +123,24 @@ export default function Today(props) {
         Array.prototype.push.apply(allTasks, reorderedOldTasks);
         Array.prototype.push.apply(allTasks, reorderedTasks);
 
+        var reorderedAllTasks = reorderTasks(allTasks)
+        var title = getTitle(reorderedAllTasks)
+
         return (
             <div>
                 { renderOpenTasksTitle(title) }
-                <Grid className={classes.root} container spacing={5}>
+                <Button className={classes.button_show_other_tasks}
+                    startIcon={<VerifiedUserIcon />}
+                    onClick={() => setShowNonWorkTasks(!showNonWorkTasks)}
+                    hidden={!isAtWork()}
+                    >
+                        <Typography className={classes.action_font_style}>
+                            {showNonWorkTasksTitle} non-work tasks
+                        </Typography>
+                </Button>
+                <Grid className={classes.root} container spacing={5} alignItems="center">
                 {
-                    allTasks.map(renderTask)
+                    reorderedAllTasks.map(renderTask)
                 }
                 </Grid>
             </div>
@@ -173,6 +198,9 @@ export default function Today(props) {
 
     function renderTask(task) {
         let taskJson = JSON.parse(task.payload);
+        if(showNonWorkTasks == false && taskJson.category != 'Work') {
+            return;
+        }
         if(taskJson.effort < 1) {
             return (
                 renderFollowupTask(task)
@@ -306,6 +334,9 @@ export default function Today(props) {
                 title = "You have " + (numTodaysTasks) + " "
                 title += (numTodaysTasks == 1) ? "task" : "tasks"
                 title += " for the day."
+                if (numTasksAtWork > 0) {
+                    title += " "+(numTasksAtWork) + " work tasks left."
+                }
             }
         } else if(isMorning()) {
             title = "Good Morning! Plan your day for today and get started."
@@ -492,31 +523,42 @@ export default function Today(props) {
     const isAtWork = () => {
         var now = new Date();
         var workStartTime = new Date();
-        workStartTime.setHours(9); workStartTime.setMinutes(0);
+        workStartTime.setHours(8); workStartTime.setMinutes(0);
         var workEndTime = new Date();
-        workEndTime.setHours(17); workEndTime.setMinutes(0);
+        workEndTime.setHours(18); workEndTime.setMinutes(0);
         return now.getTime() >= workStartTime.getTime() && now.getTime() <= workEndTime.getTime()
     }
 
     const isBeforeWork = () => {
         var now = new Date();
         var workStartTime = new Date();
-        workStartTime.setHours(9); workStartTime.setMinutes(0);
+        workStartTime.setHours(8); workStartTime.setMinutes(0);
         return now.getTime() < workStartTime.getTime()
     }
 
     const isAfterWork = () => {
         var now = new Date();
         var eveningTime = new Date();
-        eveningTime.setHours(17); eveningTime.setMinutes(0);
+        eveningTime.setHours(18); eveningTime.setMinutes(0);
         return now.getTime() >= eveningTime.getTime()
     }
 
     const timeLeftAtWork = () => {
         var now = new Date();
         var eveningTime = new Date();
-        eveningTime.setHours(17); eveningTime.setMinutes(0);
+        eveningTime.setHours(18); eveningTime.setMinutes(0);
         return eveningTime.getHours() - now.getHours()
+    }
+
+    const isPast = (someDate) => {
+        const today = new Date()
+        var parts = someDate.split('-')
+        var mydate = new Date(parts[0], parts[1] - 1, parts[2]); 
+        today.setHours(0)
+        today.setMinutes(0)
+        today.setSeconds(0)
+        today.setMilliseconds(0)
+        return mydate < today
     }
 
     const isToday = (someDate) => {
@@ -530,7 +572,7 @@ export default function Today(props) {
 
     const filterOldOpenTasks = (allTodos) => {
         var oldOpen = allTodos.filter(function(t) {
-                        return isToday(JSON.parse(t.payload).deadline) == false && 
+                        return isPast(JSON.parse(t.payload).deadline) && 
                         JSON.parse(t.payload).status != "Completed"
                     });
 
