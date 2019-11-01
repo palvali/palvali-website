@@ -200,6 +200,7 @@ export default function PlannerWidget(props) {
                         <Col>
                           <Switch
                               onChange={handleFollowupChange}
+                              checked={data.followup}
                               value="followup"
                               color="primary"
                           />

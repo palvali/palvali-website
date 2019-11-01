@@ -27,7 +27,6 @@ export default class Header extends Component {
                         <NavLink to="/today" tag={RRNavLink}>today's plan</NavLink>
                         <NavLink to="/planner" tag={RRNavLink}>planner</NavLink>
                         <NavLink to="/past" tag={RRNavLink}>past</NavLink>
-                        <NavLink to="/settings" tag={RRNavLink}>settings</NavLink>
                     </Nav>
                 </Collapse>
             </Navbar>

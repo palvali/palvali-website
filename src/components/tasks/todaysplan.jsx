@@ -510,7 +510,7 @@ export default function Today(props) {
         var parts = deadline.split('-')
         var mydate = new Date(parts[0], parts[1] - 1, parts[2]); 
         var now = new Date();
-        return now.getDate() - mydate.getDate()
+        return ((now.getTime() - mydate.getTime())/(1000 * 3600 * 24)).toFixed(0)
     }
 
     const isMorning = () => {

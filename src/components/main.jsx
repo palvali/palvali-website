@@ -14,8 +14,7 @@ export default class Main extends Component {
                     <Route path="/today" component={Today}/>
                     <Route path="/planner" component={Planner}/>
                     <Route path="/past" component={Past}/>
-                    <Route path="/settings" component={Settings}/>
-                    <Redirect exact from="/" to="planner" />
+                    <Redirect exact from="/" to="today" />
                 </Switch>
             </div>
         )
