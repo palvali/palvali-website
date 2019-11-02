@@ -22,8 +22,10 @@ import PauseIcon from '@material-ui/icons/Pause';
 import ComputerIcon from '@material-ui/icons/Computer';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
 import Slide from '@material-ui/core/Slide';
+import { Progress } from 'reactstrap';
 import { editTodo } from '../../actions';
 import './todaysplan.css';
+import { fips } from 'crypto';
 
 const useStyles = makeStyles(theme => ({
         title_paper: {
@@ -107,8 +109,8 @@ const StyledAvatar = withStyles({
 export default function Today(props) {
     const classes = useStyles();
 
-    const [showNonWorkTasks, setShowNonWorkTasks] = useState(true);
-    const [showNonWorkTasksTitle, setShowNonWorkTasksTitle] = useState('Hide');
+    const [showNonWorkTasks, setShowNonWorkTasks] = useState(false);
+    const [showNonWorkTasksTitle, setShowNonWorkTasksTitle] = useState('Show');
 
     useEffect(() => {
         if(showNonWorkTasks) setShowNonWorkTasksTitle('Hide')
@@ -198,10 +200,10 @@ export default function Today(props) {
 
     function renderTask(task) {
         let taskJson = JSON.parse(task.payload);
-        if(showNonWorkTasks == false && taskJson.category != 'Work') {
+        if(isAtWork() && showNonWorkTasks == false && taskJson.category != 'Work') {
             return;
         }
-        if(taskJson.effort < 1) {
+        if(taskJson.effort < 0.5) {
             return (
                 renderFollowupTask(task)
             )
@@ -222,9 +224,13 @@ export default function Today(props) {
                             avatar={renderCategoryAvatar(taskJson.category)}
                             action={
                                 <div align="right">
+                                    {/* {renderProgressChip(taskJson.effort, taskJson.workLog)} */}
                                     {renderDeadlineWarningChip(taskJson)}
-                                    <br />
+                                    {/* <br /> */}
                                     {renderEffortChip(taskJson.effort)}
+                                    {/* <br /> */}
+                                    {/* {renderProgressChip(taskJson.effort, taskJson.workLog)} */}
+                                    {/* {renderSpentChip(taskJson.workLog)} */}
                                     <br />
                                     {renderPriorityChip(taskJson.priority)}
                                 </div>
@@ -393,14 +399,18 @@ export default function Today(props) {
 
     function renderDeadlineWarningChip(taskJson) {
         if(isToday(taskJson.deadline)) {
-            return (
-                <Chip className={classes.font_style} size="small"  color="primary" 
-                label="Today" />
-            );
+            return
+            // return (
+                // <Chip className={classes.font_style} size="small"  color="primary" 
+                // label="Today" />
+            // );
         } else {
             return (
+                <div>
                 <Chip className={classes.font_style} size="small"  color="secondary" 
                 label= {daysLeft(taskJson.deadline) + " days late"} />
+                <br />
+                </div>
             );
         }
     }
@@ -419,6 +429,37 @@ export default function Today(props) {
         return (
             <Chip variant="outlined" className={classes.font_style} size="small"  color={priority_color} label={priority + " Priority"} />
         );
+    }
+
+    function renderProgressChip(effort, workLog, animate) {
+        var time_spent_in_mins = computeSpentTime(workLog)
+        var effort_in_mins = effort * 60
+
+        var progress_in_percent = ((time_spent_in_mins * 100)/effort_in_mins).toFixed(0)
+
+        if(progress_in_percent >= 100) {
+            return (
+                <Progress color="danger" value="100">{time_spent_in_mins + " mins spent"}</Progress>
+            )
+        }
+
+        if(animate) {
+            return (
+                <Progress multi>
+                    <Progress bar animated color="success" value={progress_in_percent}>{progress_in_percent+"%"}</Progress>
+                    <Progress bar value={100-progress_in_percent}>{(effort_in_mins - time_spent_in_mins)+" mins left"}</Progress>
+                </Progress>
+            );
+        } else {
+            return (
+                <div>
+                    <Progress multi>
+                        <Progress bar color="success" value={progress_in_percent}>{progress_in_percent+"%"}</Progress>
+                        <Progress bar value={100-progress_in_percent}>{(effort_in_mins - time_spent_in_mins)+" mins left"}</Progress>
+                    </Progress>
+                </div>
+            );
+        }
     }
 
     function renderEffortChip(effort) {
@@ -446,14 +487,70 @@ export default function Today(props) {
         );
     }
 
+    function renderSpentChip(workLog) {
+        var effort_color = 'secondary'
+        var effort_suffix = 'minutes'
+        // var converted_effort = effort
+        // if(effort >= 3) {
+        //     effort_color='secondary'
+        // }
+        // if(effort < 3) {
+        //     effort_color='primary'
+        // }
+        // if(effort < 1) {
+        //     effort_color='default'
+        // }
+        
+        // if(effort == 1) effort_suffix = 'hour'
+        // if(effort < 1) {
+        //     converted_effort = effort * 60
+        //     effort_suffix = 'minutes'
+        // }
+
+        var time_spent = computeSpentTime(workLog)
+
+        return (
+            <Chip size="small" className={classes.font_style} color={effort_color} icon={<AccessTimeIcon />} label={"Spent: " + time_spent + " " + effort_suffix} />
+        );
+    }
+
+    function computeSpentTime(workLog) {
+        var spentTime = 0
+        for(var i=0; i<workLog.length; i++) {
+            var start_time = new Date(workLog[i]['start_time'])
+            var end_time = new Date()
+            if('end_time' in workLog[i]) {
+                end_time = new Date(workLog[i]['end_time'])
+            }
+            spentTime += (end_time.getTime() - start_time.getTime())
+        }
+        return (spentTime/(1000 * 60)).toFixed(0)
+    }
+
     function handleActionChange(id, newStatus, task) {
+        console.log("Handling action for: "+task.workLog)
+
         task.status = newStatus
+        if(newStatus == 'InProgress') {
+            var worklog_entry = {
+                'start_time': new Date()
+            }
+            task.workLog.push(worklog_entry)
+        } else {
+            for(var i=0; i<task.workLog.length; i++) {
+                if(!('end_time' in task.workLog[i])) {
+                    task.workLog[i]['end_time'] = new Date()
+                }
+            }
+        }
         editTask(id, task)
     }
 
     function renderAction(id, status, task) {
         if(status == "Pending") {
             return (
+                <Grid container spacing={1}>
+                    <Grid container justify='space-between'>
                 <Button 
                 className={classes.button_start}
                 startIcon={<PlayArrowIcon />}
@@ -463,27 +560,37 @@ export default function Today(props) {
                         Start
                     </Typography>
                 </Button>
+                </Grid>
+                <Grid item xs={12}>
+                        { renderProgressChip(task.effort, task.workLog, false) }
+                    </Grid>
+                </Grid>
             );
         }
         if(status == "InProgress") {
             return (
-                <Grid container justify='space-between'>
-                    <Button 
-                        className={classes.button_start}
-                        startIcon={<PauseIcon />}
-                        onClick={() => handleActionChange(id, "Pending", task)}>
-                            <Typography className={classes.action_font_style}>
-                                Pause
-                            </Typography>
-                    </Button>
-                    <Button 
-                        className={classes.button_start}
-                        startIcon={<AssignmentTurnedInIcon />}
-                        onClick={() => handleActionChange(id, "Completed", task)}>
-                            <Typography className={classes.action_font_style}>
-                                Complete
-                            </Typography>
-                    </Button>
+                <Grid container spacing={1}>
+                    <Grid container justify='space-between'>
+                        <Button 
+                            className={classes.button_start}
+                            startIcon={<PauseIcon />}
+                            onClick={() => handleActionChange(id, "Pending", task)}>
+                                <Typography className={classes.action_font_style}>
+                                    Pause
+                                </Typography>
+                        </Button>
+                        <Button 
+                            className={classes.button_start}
+                            startIcon={<AssignmentTurnedInIcon />}
+                            onClick={() => handleActionChange(id, "Completed", task)}>
+                                <Typography className={classes.action_font_style}>
+                                    Complete
+                                </Typography>
+                        </Button>
+                    </Grid>
+                    <Grid item xs={12}>
+                        { renderProgressChip(task.effort, task.workLog, true) }
+                    </Grid>
                 </Grid>
             );
         }

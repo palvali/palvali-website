@@ -25,6 +25,17 @@ import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import Grid from '@material-ui/core/Grid';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Divider from '@material-ui/core/Divider';
+import InboxIcon from '@material-ui/icons/Inbox';
+import DraftsIcon from '@material-ui/icons/Drafts';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { addTodo, editTodo, deleteTodo } from '../../actions';
 import './plannerwidget.css';
@@ -76,6 +87,7 @@ export default function PlannerWidget(props) {
             category: t_payload.category, 
             effort: ""+t_payload.effort, 
             deadline: ""+t_payload.deadline,
+            workLog: t_payload.workLog,
             status: t_payload.status
         }
     }
@@ -152,11 +164,15 @@ export default function PlannerWidget(props) {
       setLoading(true)
       data.status = "Pending";
       if(!data.hasOwnProperty('deadline')) {
-          data.deadline = formatDate(getCurrentDate())
+        data.deadline = formatDate(getCurrentDate())
       }
 
       if(data.followup == true) {
-          data.effort = 0.1
+        data.effort = 0.1
+      }
+
+      if(!data.hasOwnProperty('workLog')) {
+        data.workLog = []
       }
 
       event.preventDefault();
@@ -212,6 +228,7 @@ export default function PlannerWidget(props) {
                         <Col>
                           <ButtonGroup >
                             <Button color="secondary" className="TaskField" outline disabled>takes</Button>
+                            <Button color="info" outline onClick={() => onEffortBtnClick(0.5)} active={data.effort === 0.5} disabled={data.followup}>0.5</Button>
                             <Button color="info" outline onClick={() => onEffortBtnClick(1)} active={data.effort === 1} disabled={data.followup}>1</Button>
                             <Button color="info" outline onClick={() => onEffortBtnClick(2)} active={data.effort === 2} disabled={data.followup}>2</Button>
                             <Button color="info" outline onClick={() => onEffortBtnClick(3)} active={data.effort === 3} disabled={data.followup}>3</Button>
@@ -285,6 +302,34 @@ export default function PlannerWidget(props) {
       return filtered_data;
   }
 
+  function renderWorkLogListItem(workLogEntry) {
+    return (
+      <ListItem>
+        <ListItemText primary={workLogEntry.start_time} secondary={workLogEntry.end_time}/>
+      </ListItem>
+    )
+  }
+
+  function renderWorkLog(rowData) {
+    var workLog = rowData.workLog
+
+    return (
+      <ExpansionPanel>
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+          {rowData.workLog.length + " Entries"}
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
+          <List>
+            {
+              workLog.map(renderWorkLogListItem)
+            }
+          </List>
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
+        
+    )
+  }
+
   function renderAllTasks(allTasks) {
       var filtered_data = filterData(allTasks)
       var tr_data = transformData(filtered_data)
@@ -298,6 +343,12 @@ export default function PlannerWidget(props) {
               lookup: { 'Work': "Work", 'Home': "Home", 'Personal': "Personal" }},
             { title: 'Effort', field: 'effort', filtering: false },
             { title: 'Deadline', field: 'deadline', type: 'date', filtering: false },
+            { 
+              title: 'Worklog', 
+              field: 'workLog', 
+              filtering: false, 
+              render: rowData => renderWorkLog(rowData)
+            },
             { title: 'Status', field: 'status',
               lookup: { 'Pending': "Pending", 'InProgress': "InProgress", 'Completed': "Completed" }},
           ],
