@@ -117,13 +117,15 @@ export default function Today(props) {
         else setShowNonWorkTasksTitle('Show')
       });
 
-    function renderTasks(oldOpenTasks, todaysOpenTasks) {
+    function renderTasks(oldOpenTasks, todaysOpenTasks, futureOpenTasks) {
         var reorderedOldTasks = reorderTasks(oldOpenTasks)
         var reorderedTasks = reorderTasks(todaysOpenTasks)
+        var reorderedFutureTasks = reorderTasks(futureOpenTasks)
 
         var allTasks = []
         Array.prototype.push.apply(allTasks, reorderedOldTasks);
         Array.prototype.push.apply(allTasks, reorderedTasks);
+        Array.prototype.push.apply(allTasks, reorderedFutureTasks);
 
         var reorderedAllTasks = reorderTasks(allTasks)
         var title = getTitle(reorderedAllTasks)
@@ -686,6 +688,16 @@ export default function Today(props) {
         return oldOpen;
     }
 
+    const filterFutureOpenTasks = (allTodos) => {
+        var futureOpen = allTodos.filter(function(t) {
+                        return !isPast(JSON.parse(t.payload).deadline) && 
+                        !isToday(JSON.parse(t.payload).deadline) &&
+                        JSON.parse(t.payload).status != "Completed"
+                    });
+
+        return futureOpen;
+    }
+
     const filterTodaysTasks = (allTodos) => {
         var todaystasks = allTodos.filter(function(t) {
                         return isToday(JSON.parse(t.payload).deadline);
@@ -706,8 +718,9 @@ export default function Today(props) {
         let todaysTasks = filterTodaysTasks(allTodos)
         let openTodaysTasks = filterOpenTasks(todaysTasks)
         let oldOpenTasks = filterOldOpenTasks(allTodos)
+        let futureOpenTasks = filterFutureOpenTasks(allTodos)
         return (
-            renderTasks(oldOpenTasks, openTodaysTasks)
+            renderTasks(oldOpenTasks, openTodaysTasks, futureOpenTasks)
         )
     }
 
