@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "f06468a9948b5b34da35c0f5953611b2",
+    "revision": "20f37c3925f26d6c6862244d4c7f4e2f",
     "url": "/palvali-website/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/palvali-website/static/css/2.266e55a5.chunk.css"
   },
   {
-    "revision": "11d9a9c0895cf79a09ad",
+    "revision": "adb68e8030b8cfcd98e8",
     "url": "/palvali-website/static/css/main.01158c88.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/palvali-website/static/js/2.05676c17.chunk.js"
   },
   {
-    "revision": "11d9a9c0895cf79a09ad",
-    "url": "/palvali-website/static/js/main.d85e3d16.chunk.js"
+    "revision": "adb68e8030b8cfcd98e8",
+    "url": "/palvali-website/static/js/main.ce4fe8cf.chunk.js"
   },
   {
     "revision": "38ff86b4182654042235",
