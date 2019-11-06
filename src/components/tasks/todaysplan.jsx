@@ -407,10 +407,25 @@ export default function Today(props) {
                 // label="Today" />
             // );
         } else {
+            var numDaysLeft = daysLeft(taskJson.deadline)
+            var suffix = (numDaysLeft == 1 || numDaysLeft == -1) ? "day" : "days"
+            if(numDaysLeft < 0) {
+                numDaysLeft *= -1
+                suffix = (numDaysLeft == 1)?"day":"days"
+                suffix += " left"
+                return (
+                    <div>
+                    <Chip className={classes.font_style} size="small"  color="default" 
+                    label= {numDaysLeft + " " + suffix} />
+                    <br />
+                    </div>
+                );
+            }
+            suffix += " late"
             return (
                 <div>
                 <Chip className={classes.font_style} size="small"  color="secondary" 
-                label= {daysLeft(taskJson.deadline) + " days late"} />
+                label= {numDaysLeft + " " + suffix} />
                 <br />
                 </div>
             );
@@ -530,8 +545,6 @@ export default function Today(props) {
     }
 
     function handleActionChange(id, newStatus, task) {
-        console.log("Handling action for: "+task.workLog)
-
         task.status = newStatus
         if(newStatus == 'InProgress') {
             var worklog_entry = {
@@ -619,7 +632,7 @@ export default function Today(props) {
         var parts = deadline.split('-')
         var mydate = new Date(parts[0], parts[1] - 1, parts[2]); 
         var now = new Date();
-        return ((now.getTime() - mydate.getTime())/(1000 * 3600 * 24)).toFixed(0)
+        return Math.floor(((now.getTime() - mydate.getTime())/(1000 * 3600 * 24))).toFixed(0)
     }
 
     const isMorning = () => {
