@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/palvali-website/static/css/main.01158c88.chunk.css",
-    "main.js": "/palvali-website/static/js/main.91a6b88a.chunk.js",
-    "main.js.map": "/palvali-website/static/js/main.91a6b88a.chunk.js.map",
+    "main.css": "/palvali-website/static/css/main.c6c8ebd9.chunk.css",
+    "main.js": "/palvali-website/static/js/main.93392e70.chunk.js",
+    "main.js.map": "/palvali-website/static/js/main.93392e70.chunk.js.map",
     "runtime~main.js": "/palvali-website/static/js/runtime~main.793c6f62.js",
     "runtime~main.js.map": "/palvali-website/static/js/runtime~main.793c6f62.js.map",
     "static/css/2.266e55a5.chunk.css": "/palvali-website/static/css/2.266e55a5.chunk.css",
-    "static/js/2.05676c17.chunk.js": "/palvali-website/static/js/2.05676c17.chunk.js",
-    "static/js/2.05676c17.chunk.js.map": "/palvali-website/static/js/2.05676c17.chunk.js.map",
+    "static/js/2.7ca4da31.chunk.js": "/palvali-website/static/js/2.7ca4da31.chunk.js",
+    "static/js/2.7ca4da31.chunk.js.map": "/palvali-website/static/js/2.7ca4da31.chunk.js.map",
     "index.html": "/palvali-website/index.html",
-    "precache-manifest.01d4bc83cee515326b68d1dc022aacd5.js": "/palvali-website/precache-manifest.01d4bc83cee515326b68d1dc022aacd5.js",
+    "precache-manifest.9c789c64745cf83a17affca73961e625.js": "/palvali-website/precache-manifest.9c789c64745cf83a17affca73961e625.js",
     "service-worker.js": "/palvali-website/service-worker.js",
     "static/css/2.266e55a5.chunk.css.map": "/palvali-website/static/css/2.266e55a5.chunk.css.map",
-    "static/css/main.01158c88.chunk.css.map": "/palvali-website/static/css/main.01158c88.chunk.css.map"
+    "static/css/main.c6c8ebd9.chunk.css.map": "/palvali-website/static/css/main.c6c8ebd9.chunk.css.map"
   }
 }
