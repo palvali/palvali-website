@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
         },
         completed_card: {
             width: 270,
-            background: green[900],
+            background: grey[800],
             color: 'white'
         },
         completed_card_content: {
