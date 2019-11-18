@@ -14,7 +14,7 @@ import './todaysplan.css';
 const useStyles = makeStyles(theme => ({
         completed_tasks_card: {
             backgroundColor: grey[200],
-            color: green[900],
+            color: grey[900],
             padding: theme.spacing(3, 2),
         },
         completed_card: {

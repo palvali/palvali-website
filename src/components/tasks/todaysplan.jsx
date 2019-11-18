@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { withStyles } from '@material-ui/core/styles';
+import { lighten, withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardActions from '@material-ui/core/CardActions';
@@ -23,73 +22,11 @@ import ComputerIcon from '@material-ui/icons/Computer';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
 import Slide from '@material-ui/core/Slide';
 import { Progress } from 'reactstrap';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import { editTodo } from '../../actions';
 import './todaysplan.css';
-import { fips } from 'crypto';
-
-const useStyles = makeStyles(theme => ({
-        title_paper: {
-            backgroundColor: blue[50],
-            padding: theme.spacing(3, 2),
-        },
-        card: {
-            width: 270,
-        },
-        open_tasks_card: {
-            backgroundColor: blue[50],
-            padding: theme.spacing(3, 2),
-        },
-        followup_task_card_header: {
-            backgroundColor: grey[400],
-        },
-        card_content: {
-            backgroundColor: grey[100],
-            height: 110,
-        },
-        font_style: {
-            fontFamily: ['Montserrat','sans-serif']
-        },
-        action_font_style: {
-            fontFamily: ['Karla','sans-serif']
-        },
-        card_action: {
-            justifyContent: "flex-start"
-        },
-        title: {
-            fontSize: 14,
-        },
-        avatar_red: {
-            backgroundColor: red[500],
-        },
-        avatar_blue: {
-            backgroundColor: blue[500],
-        },
-        avatar_orange: {
-            backgroundColor: orange[500],
-        },
-        button_start: {
-            color: 'black',
-        },
-        button_complete: {
-            margin: theme.spacing(1),
-            background: '#388e3c',
-            color: 'white',
-        },
-        button_show_other_tasks: {
-            color: 'black',
-            margin: theme.spacing(1),
-
-        },
-        expand: {
-            marginLeft: 'auto',
-        },
-        expandOpen: {
-            transform: 'rotate(180deg)',
-        },
-        root: {
-            padding: theme.spacing(3, 2),
-        },
-    }));
+import {scheduleAtWork, scheduleAtHome} from './todaytaskscheduler'
+import {useStyles} from './todaysplanstyles'
 
 const styledBy = (property, mapping) => props => mapping[props[property]];
 
@@ -105,6 +42,16 @@ const StyledAvatar = withStyles({
     },
 })(({ classes, color, ...other }) => <Avatar aria-label="recipe" className={classes.root} {...other} />);
 
+const BorderLinearProgress = withStyles({
+    root: {
+        height: 10,
+        backgroundColor: lighten('#ff6c5c', 0.5),
+    },
+    bar: {
+        borderRadius: 20,
+        backgroundColor: '#ff6c5c',
+    },
+})(LinearProgress);
 
 export default function Today(props) {
     const classes = useStyles();
@@ -118,16 +65,16 @@ export default function Today(props) {
       });
 
     function renderTasks(oldOpenTasks, todaysOpenTasks, futureOpenTasks) {
-        var reorderedOldTasks = reorderTasks(oldOpenTasks)
-        var reorderedTasks = reorderTasks(todaysOpenTasks)
-        var reorderedFutureTasks = reorderTasks(futureOpenTasks)
 
-        var allTasks = []
-        Array.prototype.push.apply(allTasks, reorderedOldTasks);
-        Array.prototype.push.apply(allTasks, reorderedTasks);
-        Array.prototype.push.apply(allTasks, reorderedFutureTasks);
+        var dayVal = getDayVal()
 
-        var reorderedAllTasks = reorderTasks(allTasks)
+        var reorderedAllTasks
+        if(dayVal == "AT_WORK") {
+            reorderedAllTasks = scheduleAtWork(oldOpenTasks, todaysOpenTasks, futureOpenTasks)
+        } else {
+            reorderedAllTasks = scheduleAtHome(oldOpenTasks, todaysOpenTasks, futureOpenTasks)
+        }
+
         var title = getTitle(reorderedAllTasks)
 
         return (
@@ -149,55 +96,6 @@ export default function Today(props) {
                 </Grid>
             </div>
         );
-    }
-
-    function reorderTasks(openTasks) {
-        var reorderedTasks = []
-
-        var dayVal = getDayVal()
-
-        var workTasks = reorder(getTasksByCategory(openTasks, "Work"))
-        var homeTasks = reorder(getTasksByCategory(openTasks, "Home"))
-        var personalTasks = reorder(getTasksByCategory(openTasks, "Personal"))
-        if(dayVal == "AT_WORK") {
-            Array.prototype.push.apply(reorderedTasks, workTasks);
-            Array.prototype.push.apply(reorderedTasks, homeTasks);
-            Array.prototype.push.apply(reorderedTasks, personalTasks);
-        } else if(dayVal == "BEFORE_WORK") {
-            Array.prototype.push.apply(reorderedTasks, homeTasks);
-            Array.prototype.push.apply(reorderedTasks, workTasks);
-            Array.prototype.push.apply(reorderedTasks, personalTasks);
-        } else {
-            Array.prototype.push.apply(reorderedTasks, personalTasks);
-            Array.prototype.push.apply(reorderedTasks, homeTasks);
-            Array.prototype.push.apply(reorderedTasks, workTasks);
-        }
-
-        return reorderedTasks
-    }
-
-    function reorder(openTasks) {
-        var reorderedTasks = []
-
-        var inprogressTasks = getTasksByStatus(openTasks, "InProgress")
-        var pendingTasks = getTasksByStatus(openTasks, "Pending")
-
-        var inprogress_high = getTasksByPriority(inprogressTasks, "High")
-        var inprogress_med = getTasksByPriority(inprogressTasks, "Medium")
-        var inprogress_low = getTasksByPriority(inprogressTasks, "Low")
-
-        var pending_high = getTasksByPriority(pendingTasks, "High")
-        var pending_med = getTasksByPriority(pendingTasks, "Medium")
-        var pending_low = getTasksByPriority(pendingTasks, "Low")
-
-        Array.prototype.push.apply(reorderedTasks, inprogress_high);
-        Array.prototype.push.apply(reorderedTasks, inprogress_med);
-        Array.prototype.push.apply(reorderedTasks, inprogress_low);
-        Array.prototype.push.apply(reorderedTasks, pending_high);
-        Array.prototype.push.apply(reorderedTasks, pending_med);
-        Array.prototype.push.apply(reorderedTasks, pending_low);
-
-        return reorderedTasks
     }
 
     function renderTask(task) {
@@ -226,13 +124,8 @@ export default function Today(props) {
                             avatar={renderCategoryAvatar(taskJson.category)}
                             action={
                                 <div align="right">
-                                    {/* {renderProgressChip(taskJson.effort, taskJson.workLog)} */}
                                     {renderDeadlineWarningChip(taskJson)}
-                                    {/* <br /> */}
                                     {renderEffortChip(taskJson.effort)}
-                                    {/* <br /> */}
-                                    {/* {renderProgressChip(taskJson.effort, taskJson.workLog)} */}
-                                    {/* {renderSpentChip(taskJson.workLog)} */}
                                     <br />
                                     {renderPriorityChip(taskJson.priority)}
                                 </div>
@@ -307,22 +200,6 @@ export default function Today(props) {
         return filteredTasks;
     }
 
-    function getTasksByPriority(tasks, priority) {
-        var filteredTasks = tasks.filter(function(t) {
-            return JSON.parse(t.payload).priority == priority;
-        });
-
-        return filteredTasks;
-    }
-
-    function getTasksByStatus(tasks, status) {
-        var filteredTasks = tasks.filter(function(t) {
-            return JSON.parse(t.payload).status == status;
-        });
-
-        return filteredTasks;
-    }
-
     function getTitle(todaysTasks) {
         var title
         var numTodaysTasks = todaysTasks.length
@@ -364,16 +241,10 @@ export default function Today(props) {
                         { title }
                     </Typography>
                 </Grid>
-                <Grid item>
+                {/* <Grid item>
                     { renderDate() }
-                </Grid>
+                </Grid> */}
             </Grid>
-        );
-    }
-
-    function renderDate() {
-        return (
-            <Chip size="medium" color="primary" className={classes.font_style} label={new Date().toDateString()} />
         );
     }
 
@@ -402,10 +273,6 @@ export default function Today(props) {
     function renderDeadlineWarningChip(taskJson) {
         if(isToday(taskJson.deadline)) {
             return
-            // return (
-                // <Chip className={classes.font_style} size="small"  color="primary" 
-                // label="Today" />
-            // );
         } else {
             var numDaysLeft = daysLeft(taskJson.deadline)
             var suffix = (numDaysLeft == 1 || numDaysLeft == -1) ? "day" : "days"
@@ -449,34 +316,32 @@ export default function Today(props) {
     }
 
     function renderProgressChip(effort, workLog, animate) {
-        var time_spent_in_mins = computeSpentTime(workLog)
-        var effort_in_mins = effort * 60
-
-        var progress_in_percent = ((time_spent_in_mins * 100)/effort_in_mins).toFixed(0)
-
+        
+        var progress_in_percent = computeCompletionPercent(effort, workLog)
         if(progress_in_percent >= 100) {
             return (
-                <Progress color="danger" value="100">{time_spent_in_mins + " mins spent"}</Progress>
+                <BorderLinearProgress variant="determinate" color="danger" value={100} />
             )
         }
 
         if(animate) {
             return (
-                <Progress multi>
-                    <Progress bar animated color="success" value={progress_in_percent}>{progress_in_percent+"%"}</Progress>
-                    <Progress bar value={100-progress_in_percent}>{(effort_in_mins - time_spent_in_mins)+" mins left"}</Progress>
-                </Progress>
+                <BorderLinearProgress variant="determinate" color="primary" value={progress_in_percent} />
             );
         } else {
             return (
-                <div>
-                    <Progress multi>
-                        <Progress bar color="success" value={progress_in_percent}>{progress_in_percent+"%"}</Progress>
-                        <Progress bar value={100-progress_in_percent}>{(effort_in_mins - time_spent_in_mins)+" mins left"}</Progress>
-                    </Progress>
-                </div>
+                <LinearProgress variant="determinate" color="primary" value={progress_in_percent} />
             );
         }
+    }
+
+    function computeCompletionPercent(effort, workLog) {
+        var time_spent_in_mins = computeSpentTime(workLog)
+        var effort_in_mins = effort * 60
+
+        var progress_in_percent = ((time_spent_in_mins * 100)/effort_in_mins).toFixed(0)
+
+        return progress_in_percent
     }
 
     function renderEffortChip(effort) {
@@ -501,33 +366,6 @@ export default function Today(props) {
 
         return (
             <Chip size="small" className={classes.font_style} color={effort_color} icon={<AccessTimeIcon />} label={converted_effort + " " + effort_suffix} />
-        );
-    }
-
-    function renderSpentChip(workLog) {
-        var effort_color = 'secondary'
-        var effort_suffix = 'minutes'
-        // var converted_effort = effort
-        // if(effort >= 3) {
-        //     effort_color='secondary'
-        // }
-        // if(effort < 3) {
-        //     effort_color='primary'
-        // }
-        // if(effort < 1) {
-        //     effort_color='default'
-        // }
-        
-        // if(effort == 1) effort_suffix = 'hour'
-        // if(effort < 1) {
-        //     converted_effort = effort * 60
-        //     effort_suffix = 'minutes'
-        // }
-
-        var time_spent = computeSpentTime(workLog)
-
-        return (
-            <Chip size="small" className={classes.font_style} color={effort_color} icon={<AccessTimeIcon />} label={"Spent: " + time_spent + " " + effort_suffix} />
         );
     }
 
@@ -587,15 +425,15 @@ export default function Today(props) {
                 <Grid container spacing={1}>
                     <Grid container justify='space-between'>
                         <Button 
-                            className={classes.button_start}
+                            className={classes.button_pause}
                             startIcon={<PauseIcon />}
                             onClick={() => handleActionChange(id, "Pending", task)}>
                                 <Typography className={classes.action_font_style}>
-                                    Pause
+                                    { computeCompletionPercent(task.effort, task.workLog) + "% done" }
                                 </Typography>
                         </Button>
                         <Button 
-                            className={classes.button_start}
+                            className={classes.button_complete}
                             startIcon={<AssignmentTurnedInIcon />}
                             onClick={() => handleActionChange(id, "Completed", task)}>
                                 <Typography className={classes.action_font_style}>

@@ -19,12 +19,12 @@ export default class Header extends Component {
 
     render() {
         return (
-            <Navbar dark expand="md" style={{background:"#213969"}}>
+            <Navbar dark expand="md" style={{background:"#000000"}}>
                 <NavbarBrand href="/"><span className="siteTitle">ONE PLANNER</span></NavbarBrand>
                 <NavbarToggler onClick={this.toggle} />
                 <Collapse isOpen={this.state.isOpen} navbar>
                     <Nav className="siteNav" navbar>
-                        <NavLink to="/today" tag={RRNavLink}>today's plan</NavLink>
+                        <NavLink to="/today" tag={RRNavLink}>today</NavLink>
                         <NavLink to="/planner" tag={RRNavLink}>planner</NavLink>
                         <NavLink to="/past" tag={RRNavLink}>past</NavLink>
                     </Nav>

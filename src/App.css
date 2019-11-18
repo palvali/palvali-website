@@ -19,13 +19,14 @@
 }
 
 .siteTitle {
-  font-family: 'Karla', sans-serif;
-  font-size: xx-large;
+  font-family: 'Tomorrow', sans-serif;
+  font-weight: 700;
+  font-size: xx-large
 }
 
 .siteNav {
   font-family: 'Montserrat', sans-serif;
-  font-size: large;
+  font-size: larger
 }
 
 @keyframes App-logo-spin {
