@@ -28,10 +28,29 @@ export var scheduleAtWork = function(oldOpenTasks, todaysOpenTasks, futureOpenTa
         i++
     }
     console.log("Returning tasks: "+reorderedTasks.length)
+
+    var nonWorkTasks = reorderNonWorkTasks(oldOpenTasks, todaysOpenTasks, futureOpenTasks)
+    Array.prototype.push.apply(reorderedTasks, nonWorkTasks)
+
     return reorderedTasks
 }
 
 export var scheduleAtHome = function(oldOpenTasks, todaysOpenTasks, futureOpenTasks) {
+    var reorderedTasks = reorderNonWorkTasks(oldOpenTasks, todaysOpenTasks, futureOpenTasks)
+
+    var workTasks = []
+    var oldWorkTasks = getTasksByCategory(oldOpenTasks, "Work")
+    var todayWorkTasks = getTasksByCategory(todaysOpenTasks, "Work")
+    Array.prototype.push.apply(workTasks, oldWorkTasks)
+    Array.prototype.push.apply(workTasks, todayWorkTasks)
+    workTasks = reorderByPriority(workTasks)
+
+    Array.prototype.push.apply(reorderedTasks, workTasks)
+
+    return reorderedTasks
+}
+
+function reorderNonWorkTasks(oldOpenTasks, todaysOpenTasks, futureOpenTasks) {
     var reorderedTasks = []
 
     var openTasks = []
@@ -47,15 +66,6 @@ export var scheduleAtHome = function(oldOpenTasks, todaysOpenTasks, futureOpenTa
     Array.prototype.push.apply(reorderedTasks, homeTasks)
 
     reorderedTasks = reorderByPriority(reorderedTasks)
-
-    var workTasks = []
-    var oldWorkTasks = getTasksByCategory(oldOpenTasks, "Work")
-    var todayWorkTasks = getTasksByCategory(todaysOpenTasks, "Work")
-    Array.prototype.push.apply(workTasks, oldWorkTasks)
-    Array.prototype.push.apply(workTasks, todayWorkTasks)
-    workTasks = reorderByPriority(workTasks)
-
-    Array.prototype.push.apply(reorderedTasks, workTasks)
 
     return reorderedTasks
 }
